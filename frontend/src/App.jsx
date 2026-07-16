@@ -9,7 +9,7 @@ import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
   const [inputText, setInputText] = useState('');
-  const [ingredients, setIngredients] = useState([]);
+  const [ingredients, setIngredients] = useState(['Greek Yogurt', 'Paneer', 'Cumin Seeds']);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen' | 'history'
   const [onlyFavoritesView, setOnlyFavoritesView] = useState(false);
