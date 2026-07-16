@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { recipeService } from '../services/recipeService';
+import React, { useState, useEffect } from 'react';
+import { loadRecipes, deleteRecipe } from '../utils/recipeHistory';
 import { RotateCw, AlertTriangle, Clock } from 'lucide-react';
 
 export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavoritesView }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Note: loading and error kept for UI compatibility but localStorage reads are synchronous
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'yesterday' | 'breakfast' | 'indian' | 'quick' | 'desserts'
   
   // Local storage favorites state
@@ -17,39 +18,25 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
     }
   });
 
-  const activeControllerRef = useRef(null);
-
   useEffect(() => {
     fetchHistory();
-    return () => {
-      if (activeControllerRef.current) activeControllerRef.current.abort();
-    };
   }, []);
 
-  const fetchHistory = async () => {
-    if (activeControllerRef.current) activeControllerRef.current.abort();
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
-
+  const fetchHistory = () => {
     setLoading(true);
     setError(null);
     try {
-      const items = await recipeService.getHistory(controller.signal);
-      if (!controller.signal.aborted) {
-        setHistory(items);
-        setLoading(false);
-      }
+      const items = loadRecipes();
+      setHistory(items);
     } catch (err) {
-      if (err.name === 'AbortError') return;
-      if (!controller.signal.aborted) {
-        setError('Failed to load recipe history from Atlas.');
-        setLoading(false);
-      }
+      setError('Failed to load recipe history.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const toggleFavorite = (e, recipeId) => {
-    e.stopPropagation(); // Prevent clicking favorite button from opening recipe details
+    e.stopPropagation();
     setFavorites(prev => {
       const next = prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId];
       localStorage.setItem('tadka_favorites', JSON.stringify(next));
@@ -57,17 +44,16 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
     });
   };
 
-  const handleDeleteClick = async (e, recipeId) => {
-    e.stopPropagation(); // Prevent clicking delete button from opening recipe details
-    const confirmDelete = window.confirm("Are you sure you want to delete this recipe from your history archive?");
+  const handleDeleteClick = (e, recipeId) => {
+    e.stopPropagation();
+    const confirmDelete = window.confirm("Are you sure you want to delete this recipe from your history?");
     if (!confirmDelete) return;
 
-    try {
-      await recipeService.deleteRecipe(recipeId);
-      // Success: instantly filter out of the history view list
-      setHistory(prev => prev.filter(item => item._id !== recipeId));
-    } catch (err) {
-      alert(err.message || "Failed to delete recipe. Please try again.");
+    const success = deleteRecipe(recipeId);
+    if (success) {
+      setHistory(prev => prev.filter(item => item.id !== recipeId));
+    } else {
+      alert("Failed to delete recipe. Please try again.");
     }
   };
 
@@ -123,7 +109,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
   const filteredHistory = history.filter(item => {
     // If favorites mode is activated via sidebar
     if (showOnlyFavorites) {
-      return favorites.includes(item._id);
+      return favorites.includes(item.id);
     }
 
     const t = item.title?.toLowerCase() || '';
@@ -307,7 +293,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
               return (
                 <div 
                   key={item._id}
-                  onClick={() => onSelectRecipe(item._id)}
+                  onClick={() => onSelectRecipe(item)}
                   className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative animate-scale-in"
                 >
                   <div className="recipe-image-container h-[400px] relative overflow-hidden rounded-2xl">
@@ -369,7 +355,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
             return (
               <div 
                 key={item._id}
-                onClick={() => onSelectRecipe(item._id)}
+                onClick={() => onSelectRecipe(item)}
                 className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative animate-scale-in"
               >
                 <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">

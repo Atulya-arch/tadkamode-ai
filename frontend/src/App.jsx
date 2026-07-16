@@ -30,7 +30,7 @@ function App() {
   }, []);
   const [customInputOpen, setCustomInputOpen] = useState(false);
   const [newCustomTag, setNewCustomTag] = useState('');
-  const { recipe, status, error, generate, loadRecipeFromHistory, retry, clear, isLoading } = useRecipeGenerator();
+  const { recipe, status, error, generate, loadFromLocal, retry, clear, isLoading } = useRecipeGenerator();
 
   // Preset categorized ingredients matching Stitch mockup
   const presetIngredients = {
@@ -92,9 +92,9 @@ function App() {
     setIngredients(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
-  const handleHistorySelection = (recipeId) => {
-    // Load recipe into the global generator hook
-    loadRecipeFromHistory(recipeId);
+  const handleHistorySelection = (recipeObject) => {
+    // Load the full recipe object directly into state (no network call)
+    loadFromLocal(recipeObject);
     // Open the kitchen workspace view to show the result
     setCurrentView('kitchen');
   };

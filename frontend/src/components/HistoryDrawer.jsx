@@ -1,70 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { recipeService } from '../services/recipeService';
-import { X, Calendar, Flame, ChefHat, AlertCircle, RotateCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { loadRecipes } from '../utils/recipeHistory';
+import { X, Calendar, Flame, ChefHat } from 'lucide-react';
 
 /**
- * Slide-out Drawer showing recipe history.
- * Retreives generated recipes summaries from MongoDB on open and lets users reload them.
+ * Slide-out Drawer showing recipe history from localStorage.
+ * Reads history synchronously on open — no network call needed.
  */
 export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
   const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const activeControllerRef = useRef(null);
 
+  // Reload history from localStorage every time the drawer opens
   useEffect(() => {
     if (isOpen) {
-      fetchHistory();
+      setHistory(loadRecipes());
     }
-    
-    return () => {
-      if (activeControllerRef.current) {
-        activeControllerRef.current.abort();
-      }
-    };
   }, [isOpen]);
 
-  const fetchHistory = async () => {
-    if (activeControllerRef.current) {
-      activeControllerRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const items = await recipeService.getHistory(controller.signal);
-      if (!controller.signal.aborted) {
-        setHistory(items);
-        setLoading(false);
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') return;
-      if (!controller.signal.aborted) {
-        console.error('[History Drawer] Failed to fetch history:', err);
-        setError('Failed to load recipe history.');
-        setLoading(false);
-      }
-    }
-  };
-
-  const handleSelect = async (recipeId) => {
+  const handleSelect = (recipe) => {
     onClose();
-    // Pass selection up to reload state
-    onSelectRecipe(recipeId);
+    // Pass the full recipe object — no network fetch required
+    onSelectRecipe(recipe);
   };
 
-  // Helper to format Date string
+  // Helper to format ISO date string
   const formatDate = (dateStr) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString(undefined, { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
+      return d.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
       });
     } catch (e) {
       return dateStr;
@@ -73,8 +38,8 @@ export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
 
   return (
     <>
-      {/* Backdrop Backdrop Overlay */}
-      <div 
+      {/* Backdrop Overlay */}
+      <div
         onClick={onClose}
         className={`fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -82,7 +47,7 @@ export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
       ></div>
 
       {/* Slide-out Drawer Panel */}
-      <aside 
+      <aside
         className={`fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-slate-900 border-l border-slate-800 shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-out transform ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -105,22 +70,8 @@ export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
 
         {/* Drawer Content Area */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
-              <RotateCw className="w-8 h-8 animate-spin text-amber-500" />
-              <p className="text-xs font-semibold">Retrieving history drawer...</p>
-            </div>
-          )}
 
-          {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex gap-2 text-sm items-start">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <p className="font-medium">{error}</p>
-            </div>
-          )}
-
-          {!loading && !error && history.length === 0 && (
+          {history.length === 0 && (
             <div className="text-center py-16 text-slate-500 flex flex-col items-center justify-center gap-3">
               <ChefHat className="w-12 h-12 stroke-[1.2] text-slate-600" />
               <div className="max-w-[200px]">
@@ -132,12 +83,12 @@ export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
             </div>
           )}
 
-          {!loading && !error && history.length > 0 && (
+          {history.length > 0 && (
             <div className="space-y-3">
               {history.map((item) => (
                 <button
-                  key={item._id}
-                  onClick={() => handleSelect(item._id)}
+                  key={item.id}
+                  onClick={() => handleSelect(item)}
                   className="w-full text-left p-4 bg-slate-950/40 border border-slate-850 hover:border-slate-750 hover:bg-slate-950/80 rounded-xl transition-all cursor-pointer flex flex-col gap-2 group"
                 >
                   <div className="flex justify-between items-start gap-2">
@@ -172,4 +123,5 @@ export const HistoryDrawer = ({ isOpen, onClose, onSelectRecipe }) => {
     </>
   );
 };
+
 export default HistoryDrawer;

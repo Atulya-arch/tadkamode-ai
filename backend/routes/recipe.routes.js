@@ -1,21 +1,10 @@
 import express from 'express';
-import * as recipeController from '../controllers/recipe.controller.js';
+import { generateRecipe } from '../controllers/recipe.controller.js';
 
 const router = express.Router();
 
-// Generate recipe
-router.post('/generate', recipeController.generateRecipe);
-
-// Get mock recipe for testing
-router.get('/mock', recipeController.getMockRecipe);
-
-// Get history list summaries
-router.get('/history', recipeController.getRecipeHistory);
-
-// Get a single recipe by ID
-router.get('/history/:id', recipeController.getRecipeById);
-
-// Delete a recipe from history
-router.delete('/history/:id', recipeController.deleteRecipeById);
+// POST /api/recipes/generate
+// Receives ingredients, calls Groq, returns structured recipe JSON
+router.post('/generate', generateRecipe);
 
 export default router;

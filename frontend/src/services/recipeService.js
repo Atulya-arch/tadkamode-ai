@@ -1,26 +1,30 @@
+/**
+ * recipeService.js
+ * 
+ * Frontend service layer for communicating with the TadkaMode backend.
+ * Responsibility: Call the backend's single recipe generation endpoint.
+ * History, persistence, and deletion are handled locally via recipeHistory.js.
+ */
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-// Helper to resolve JWT headers dynamically if a user is authenticated
-const getHeaders = () => {
-  const token = localStorage.getItem('tadka_token');
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
-};
-
 /**
- * Service to handle communication with backend Recipe API endpoints
+ * Service to handle communication with the backend Recipe API.
  */
 export const recipeService = {
   /**
-   * Triggers a live recipe generation from the ingredients list
+   * Sends the ingredients list to the backend, which calls Groq and returns
+   * a validated, structured recipe JSON.
+   * 
+   * @param {Array<string>} ingredients - List of ingredients from the user
+   * @param {AbortSignal} signal - AbortController signal for request cancellation
+   * @returns {object} Validated recipe object
    */
   async generateRecipe(ingredients, signal) {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/generate`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingredients }),
         signal,
       });
@@ -28,113 +32,18 @@ export const recipeService = {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to generate recipe from AI.');
+        // Surface the backend's error message if available
+        throw new Error(result.message || `Server error ${response.status}: Failed to generate recipe.`);
       }
 
       return result.data.recipe;
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('[Recipe Service] Generation request cancelled successfully.');
+        console.log('[recipeService] Generation request cancelled.');
       }
       throw error;
     }
   },
-
-  /**
-   * Retrieves a mock recipe validating our schema on the backend
-   */
-  async getMockRecipe(signal) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/recipes/mock`, {
-        method: 'GET',
-        headers: getHeaders(),
-        signal,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to fetch mock recipe.');
-      }
-
-      return result.data.recipe;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('[Recipe Service] Mock request cancelled successfully.');
-      }
-      throw error;
-    }
-  },
-
-  /**
-   * Fetches recipe generation history list summaries
-   */
-  async getHistory(signal) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/recipes/history`, {
-        method: 'GET',
-        headers: getHeaders(),
-        signal,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to fetch history.');
-      }
-
-      return result.data.recipes || [];
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('[Recipe Service] History request cancelled.');
-      }
-      throw error;
-    }
-  },
-
-  /**
-   * Fetches full recipe detail by ID to reload it
-   */
-  async getRecipeById(id, signal) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
-        method: 'GET',
-        headers: getHeaders(),
-        signal,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to fetch recipe details.');
-      }
-
-      return result.data.recipe;
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('[Recipe Service] Recipe detail request cancelled.');
-      }
-      throw error;
-    }
-  },
-
-  /**
-   * Deletes a recipe by its ID
-   */
-  async deleteRecipe(id) {
-    const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders()
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to delete recipe.');
-    }
-
-    return result;
-  }
 };
 
 export default recipeService;

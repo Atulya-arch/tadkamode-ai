@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { recipeService } from '../services/recipeService';
+import { saveRecipe } from '../utils/recipeHistory';
 
 /**
- * Custom React hook to orchestrate recipe generation API calls, 
- * loading states, error handling, retries, history reloading, and request cancellations.
+ * Custom React hook to orchestrate recipe generation, loading states,
+ * error handling, retries, history reloading, and request cancellations.
+ * 
+ * History is persisted to localStorage via recipeHistory.js after each
+ * successful generation. No database or network calls for history.
  */
 export const useRecipeGenerator = () => {
   const [recipe, setRecipe] = useState(null);
@@ -24,9 +28,10 @@ export const useRecipeGenerator = () => {
   }, []);
 
   /**
-   * Generates a new recipe from ingredient inventory
+   * Generates a new recipe from ingredient inventory.
+   * Saves to localStorage on success.
    */
-  const generate = useCallback(async (ingredientsList, useMock = false) => {
+  const generate = useCallback(async (ingredientsList) => {
     // 1. Cancel previous pending request to prevent race conditions
     if (activeControllerRef.current) {
       console.log('[useRecipeGenerator] Cancelling pending request...');
@@ -43,16 +48,13 @@ export const useRecipeGenerator = () => {
     setLastIngredients(ingredientsList);
 
     try {
-      let data;
-      if (useMock) {
-        data = await recipeService.getMockRecipe(controller.signal);
-      } else {
-        data = await recipeService.generateRecipe(ingredientsList, controller.signal);
-      }
+      const data = await recipeService.generateRecipe(ingredientsList, controller.signal);
 
       // Only update state if this request wasn't aborted
       if (!controller.signal.aborted) {
-        setRecipe(data);
+        // 4. Persist to localStorage immediately after generation
+        const savedRecipe = saveRecipe(data, ingredientsList);
+        setRecipe(savedRecipe);
         setStatus('success');
         activeControllerRef.current = null;
       }
@@ -72,41 +74,20 @@ export const useRecipeGenerator = () => {
   }, []);
 
   /**
-   * Loads a full recipe from history by ID
+   * Loads a full recipe object directly from localStorage (no network call).
+   * Used by HistoryDrawer and HistoryView when user clicks a past recipe.
+   * 
+   * @param {object} recipeObject - Full recipe object from localStorage
    */
-  const loadRecipeFromHistory = useCallback(async (recipeId) => {
-    // 1. Cancel previous pending request to prevent race conditions
+  const loadFromLocal = useCallback((recipeObject) => {
+    // Cancel any inflight generation request
     if (activeControllerRef.current) {
-      console.log('[useRecipeGenerator] Cancelling pending request...');
       activeControllerRef.current.abort();
+      activeControllerRef.current = null;
     }
-
-    // 2. Create a new controller for this request
-    const controller = new AbortController();
-    activeControllerRef.current = controller;
-
-    // 3. Update loading states
-    setStatus('loading');
+    setRecipe(recipeObject);
+    setStatus('success');
     setError(null);
-
-    try {
-      const data = await recipeService.getRecipeById(recipeId, controller.signal);
-      
-      // Only update state if this request wasn't aborted
-      if (!controller.signal.aborted) {
-        setRecipe(data);
-        setStatus('success');
-        activeControllerRef.current = null;
-      }
-    } catch (err) {
-      if (err.name === 'AbortError') return;
-      
-      if (!controller.signal.aborted) {
-        setError(err.message || 'Failed to reload historical recipe.');
-        setStatus('error');
-        activeControllerRef.current = null;
-      }
-    }
   }, []);
 
   const retry = useCallback(() => {
@@ -132,10 +113,11 @@ export const useRecipeGenerator = () => {
     error,
     lastIngredients,
     generate,
-    loadRecipeFromHistory,
+    loadFromLocal,
     retry,
     clear,
     isLoading: status === 'loading'
   };
 };
+
 export default useRecipeGenerator;
