@@ -55,6 +55,54 @@ export const RecipeView = ({ recipe, onReset }) => {
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
   const calculatedCalories = macros.protein * 4 + macros.carbs * 4 + macros.fat * 9 + 300; // Offset base calories for realistic culinary totals
 
+  // Stable deterministic image lookup matching HistoryView
+  const getRecipeImage = (title = '', id = '') => {
+    const t = title.toLowerCase();
+    
+    // Stitch Mockup images map
+    const images = [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCSMtRTkGYg55sGjuiGCIlhF1z6ulPh3hpzUgE4R-YYLu8W0xvnlWT3Oo8_8ST0pn_Zi557Ucr6z-Q-f7jDWhDRnXnSq_VrQFXKYMDCKdeDN9AL7VFCx0VRcgrG9xF8hU2f_VsDlW7SYcg9FfmoiTrf6MP8a455jVv-52CGqJKvWeI0wYciUScjR2fsx0ZgNKeujZqYP6HJPdkbUFweJZCA1Y9KUNVKPiFpiKi4Ha25yZm3BUF-fGPxDA", // Tikka Tofu
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuC1HhqnPbVEcTCzIzw-MHjHcOnGmNr5kwS5FU2enbhaidZzYq7Dv_kRyWucjG7VBBUXoaXC93GoUwpI5VGnUslVHgLZlqM8uc87zdm7OmD6zZAVFamuAwmAXHe8NptB7nuGCc2a7Yj3sOfILR0-EUH8XQzbdTxcKsCvZYfKWOKddAHLLDpdeaOWshUWyxP2XIzQn_xso43JgoioDsIl6RFnVN16QshGp1x612x-sciXdAmb_rX9Rna5Xw", // Avo Toast
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDgA81ImlYWPqnGUvCcTe_86fyNNYkTTX_b54L1Z_YK4pdsHt8MAiGtlNTPz8XvRrRAksd61e5OyB6Vhaz8_QTbBvky3scB3InZEM5VNOETKnCDi053MWOEhFghTA5RlyYJNR0A69CYhdGBnuEvM8exykF2djp_sMtgQXfbcDzY4QxVEqLlwHW0ZDEL8ZXirArUMMYf1epzp-tPKCZpqBASeuCqNe57eTpInq_foBC0LqzD9GW4ZFY_vg", // Lava Cake
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCsX8Sm0y_EX4ztiG4q2gCmUg3XdMy3WqmZXa137SdLIT7rJefsxTXIDaHcy7NHa_nDSUMvIsjo3HrxjwuiwUJlnEBK_OiO-dvQDUW5KeE2Vt2UBNQGr3YAbiA_6DgNCmkMoOjhvs--o2VJMzY873_PGfzDY3jK0V9Ix_PSU8BmQtNKknGYfKx0iEYeMUSsE85a1Qg2qNPe8qqpbU85ars9p8V07I_4amDqon9xr8rKHMw1245B2AhHmA", // Citrus Salad
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDXgs4l58XRlcyu9IHsEEZLEiCjH74_BStvfkusb7cXrxpU1AYD_oIW_SUklMsClzvBzeH7D4FZCqESDtNZqv7xUTWX8hS1CqJ2nMIDg8TAjuU7-E_WWSw3o24XaqfWqav8a4uOGX3b23fAR60XgMufs3v_wuxlX1CdvJATT6S2rIAmT4vQS8IujiQ0BmS6RZXdv9rhCfG-GnYi8xcPiGrMNXZlk1gGiaLsuVx2B-4gejMOPWwdd9qH2Q"  // Tomato bisque
+    ];
+
+    // Precise keyword matching
+    if (t.includes('risotto') || t.includes('scallop') || t.includes('seafood') || t.includes('fish')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuBG8N4HU4PpqtUvNb-_v9rPoW5DoYMmq46mQtf5Os3jVj7D3pXJI-AgVy04HvF6Hxm0xcpROA4bfzjcec0Ycu7FsMEOt0N5I801CSy7NaPA1rxz0atBK9gUCgVyoOqgy0xYuejfGmR-DpGOd9-f8xzEGmTjyOq8QsjSmyKVofFGAptYD5oCbfRokP7cDB72LyZcwnftZFAyofjo3oJgiT1XTpv2VGTbGgeKd45Y6s8lW_aq_0DFdS-nSQ";
+    }
+    if (t.includes('tofu') || t.includes('tikka') || t.includes('paneer') || t.includes('masala') || t.includes('curry') || t.includes('daal')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuCSMtRTkGYg55sGjuiGCIlhF1z6ulPh3hpzUgE4R-YYLu8W0xvnlWT3Oo8_8ST0pn_Zi557Ucr6z-Q-f7jDWhDRnXnSq_VrQFXKYMDCKdeDN9AL7VFCx0VRcgrG9xF8hU2f_VsDlW7SYcg9FfmoiTrf6MP8a455jVv-52CGqJKvWeI0wYciUScjR2fsx0ZgNKeujZqYP6HJPdkbUFweJZCA1Y9KUNVKPiFpiKi4Ha25yZm3BUF-fGPxDA";
+    }
+    if (t.includes('toast') || t.includes('avo') || t.includes('egg') || t.includes('omelette') || t.includes('scramble')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuC1HhqnPbVEcTCzIzw-MHjHcOnGmNr5kwS5FU2enbhaidZzYq7Dv_kRyWucjG7VBBUXoaXC93GoUwpI5VGnUslVHgLZlqM8uc87zdm7OmD6zZAVFamuAwmAXHe8NptB7nuGCc2a7Yj3sOfILR0-EUH8XQzbdTxcKsCvZYfKWOKddAHLLDpdeaOWshUWyxP2XIzQn_xso43JgoioDsIl6RFnVN16QshGp1x612x-sciXdAmb_rX9Rna5Xw";
+    }
+    if (t.includes('cake') || t.includes('lava') || t.includes('dessert') || t.includes('sweet') || t.includes('chocolate')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuDgA81ImlYWPqnGUvCcTe_86fyNNYkTTX_b54L1Z_YK4pdsHt8MAiGtlNTPz8XvRrRAksd61e5OyB6Vhaz8_QTbBvky3scB3InZEM5VNOETKnCDi053MWOEhFghTA5RlyYJNR0A69CYhdGBnuEvM8exykF2djp_sMtgQXfbcDzY4QxVEqLlwHW0ZDEL8ZXirArUMMYf1epzp-tPKCZpqBASeuCqNe57eTpInq_foBC0LqzD9GW4ZFY_vg";
+    }
+    if (t.includes('salad') || t.includes('citrus') || t.includes('bowl') || t.includes('green') || t.includes('harvest')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuCsX8Sm0y_EX4ztiG4q2gCmUg3XdMy3WqmZXa137SdLIT7rJefsxTXIDaHcy7NHa_nDSUMvIsjo3HrxjwuiwUJlnEBK_OiO-dvQDUW5KeE2Vt2UBNQGr3YAbiA_6DgNCmkMoOjhvs--o2VJMzY873_PGfzDY3jK0V9Ix_PSU8BmQtNKknGYfKx0iEYeMUSsE85a1Qg2qNPe8qqpbU85ars9p8V07I_4amDqon9xr8rKHMw1245B2AhHmA";
+    }
+    if (t.includes('tomato') || t.includes('soup') || t.includes('bisque') || t.includes('broth')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuDXgs4l58XRlcyu9IHsEEZLEiCjH74_BStvfkusb7cXrxpU1AYD_oIW_SUklMsClzvBzeH7D4FZCqESDtNZqv7xUTWX8hS1CqJ2nMIDg8TAjuU7-E_WWSw3o24XaqfWqav8a4uOGX3b23fAR60XgMufs3v_wuxlX1CdvJATT6S2rIAmT4vQS8IujiQ0BmS6RZXdv9rhCfG-GnYi8xcPiGrMNXZlk1gGiaLsuVx2B-4gejMOPWwdd9qH2Q";
+    }
+    if (t.includes('ramen') || t.includes('noodle') || t.includes('miso') || t.includes('japanese') || t.includes('soup')) {
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuA6rpSedwDBOBpk3y42TP757sqQ1de9xvMZlSVz5bLFIR38OTXFLWnk7EzNppaklCMBXkjWZ4vjRTjTA547n2DCBzWB5ZlgMWHkSxgs0L_HN78R5fAZqg650bRXohuSxvV_jHcysByqOXlW48BX4MlQD1n-SAXUKww37EcOlMbE_0nAVi7Ya4GDvrYa2OChipTzTHg3Zdo4GU5ui0axPKyw6xxUOzNiVfgxSo2_nTLoZJID26OxdtMK0A";
+    }
+
+    // Stable Hash fallback based on Database ID string
+    let stableIndex = 0;
+    if (id) {
+      let hash = 0;
+      for (let i = 0; i < id.length; i++) {
+        hash = id.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      stableIndex = Math.abs(hash);
+    }
+    return images[stableIndex % images.length];
+  };
+
   // Dynamic ingredient icons based on name tags matching mockup style
   const getIngredientIcon = (name = '') => {
     const n = name.toLowerCase();
@@ -81,7 +129,7 @@ export const RecipeView = ({ recipe, onReset }) => {
               <img 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                 alt={recipe.title} 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx80r09R3RuhB0SV9X6Dd--NynRN-bMhhHWG-22LuomFHyoigAmftVVtlx1jh7o9r1Z6G5XyB6RrtatFXTEGXVbuonVzC3flN0lpnL9I0T1NieeWKD_bAwpmpVNlNv65I2BZXJLxftiaTDRW75K5VPpKpxXZ06KOYc9jXHKisulU1kJWSeT_qV5XiYxYJ4fKVtmwojv_oVyFKxcsJPgOoFIWFmHNsOsCeQRym8cy57xH_SB65Y6BK7Cw"
+                src={getRecipeImage(recipe.title, recipe._id)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent"></div>
               
