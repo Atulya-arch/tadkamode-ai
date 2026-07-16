@@ -57,6 +57,20 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
     });
   };
 
+  const handleDeleteClick = async (e, recipeId) => {
+    e.stopPropagation(); // Prevent clicking delete button from opening recipe details
+    const confirmDelete = window.confirm("Are you sure you want to delete this recipe from your history archive?");
+    if (!confirmDelete) return;
+
+    try {
+      await recipeService.deleteRecipe(recipeId);
+      // Success: instantly filter out of the history view list
+      setHistory(prev => prev.filter(item => item._id !== recipeId));
+    } catch (err) {
+      alert(err.message || "Failed to delete recipe. Please try again.");
+    }
+  };
+
   // Stable deterministic image lookup based on recipe title & database ObjectId hash
   const getRecipeImage = (title = '', id = '') => {
     const t = title.toLowerCase();
@@ -166,7 +180,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
             {showOnlyFavorites && (
               <button 
                 onClick={handleClearFavoritesFilter}
-                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-xs font-bold border-none cursor-pointer shadow-md"
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-xs font-bold border-none cursor-pointer shadow-md text-center"
               >
                 <span>Show All History</span>
               </button>
@@ -294,7 +308,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                 <div 
                   key={item._id}
                   onClick={() => onSelectRecipe(item._id)}
-                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative"
+                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative animate-scale-in"
                 >
                   <div className="recipe-image-container h-[400px] relative overflow-hidden rounded-2xl">
                     <img 
@@ -315,6 +329,15 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                     >
                       <span className="material-symbols-outlined" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
                         favorite
+                      </span>
+                    </button>
+                    {/* Absolute Trash button for deleting */}
+                    <button 
+                      onClick={(e) => handleDeleteClick(e, item._id)}
+                      className="absolute top-4 right-16 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">
+                        delete
                       </span>
                     </button>
                   </div>
@@ -347,7 +370,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
               <div 
                 key={item._id}
                 onClick={() => onSelectRecipe(item._id)}
-                className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative"
+                className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative animate-scale-in"
               >
                 <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">
                   <img 
@@ -362,6 +385,15 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                   >
                     <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
                       favorite
+                    </span>
+                  </button>
+                  {/* Absolute Trash button for deleting */}
+                  <button 
+                    onClick={(e) => handleDeleteClick(e, item._id)}
+                    className="absolute top-3 right-13 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      delete
                     </span>
                   </button>
                 </div>

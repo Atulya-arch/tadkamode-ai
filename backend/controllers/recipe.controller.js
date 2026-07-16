@@ -99,3 +99,29 @@ export const getRecipeById = async (req, res, next) => {
     return next(error);
   }
 };
+
+/**
+ * Centralized endpoint to delete a recipe from history database
+ */
+export const deleteRecipeById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return next(new AppError('Invalid Recipe ID format.', 400));
+    }
+
+    const recipe = await Recipe.findByIdAndDelete(id);
+
+    if (!recipe) {
+      return next(new AppError('Recipe not found in history.', 404));
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Recipe deleted successfully from history.'
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

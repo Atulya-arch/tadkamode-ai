@@ -115,5 +115,25 @@ export const recipeService = {
       }
       throw error;
     }
+  },
+
+  /**
+   * Deletes a recipe by its ID
+   */
+  async deleteRecipe(id) {
+    const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to delete recipe.');
+    }
+
+    return result;
   }
 };

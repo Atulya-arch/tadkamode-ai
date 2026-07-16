@@ -15,4 +15,7 @@ router.get('/history', recipeController.getRecipeHistory);
 // Get a single recipe by ID
 router.get('/history/:id', recipeController.getRecipeById);
 
+// Delete a recipe from history
+router.delete('/history/:id', recipeController.deleteRecipeById);
+
 export default router;
