@@ -4,13 +4,14 @@ import { RecipeSkeleton } from './components/RecipeSkeleton';
 import { RecipeView } from './components/RecipeView';
 import { HistoryDrawer } from './components/HistoryDrawer';
 import { ShaderBackground } from './components/ShaderBackground';
+import { HistoryView } from './components/HistoryView';
 import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
   const [inputText, setInputText] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen'
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen' | 'history'
   const [customInputOpen, setCustomInputOpen] = useState(false);
   const [newCustomTag, setNewCustomTag] = useState('');
   const { recipe, status, error, generate, loadRecipeFromHistory, retry, clear, isLoading } = useRecipeGenerator();
@@ -75,6 +76,13 @@ function App() {
     setIngredients(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
+  const handleHistorySelection = (recipeId) => {
+    // Load recipe into the global generator hook
+    loadRecipeFromHistory(recipeId);
+    // Open the kitchen workspace view to show the result
+    setCurrentView('kitchen');
+  };
+
   // Check if we render the side-nav layout or full-screen landing layout
   const isDashboardLayout = currentView !== 'landing';
 
@@ -88,7 +96,7 @@ function App() {
         
         {/* Sticky Sidebar Navigation (Anchor) */}
         {isDashboardLayout && (
-          <aside className="fixed left-0 top-0 h-screen w-64 glass-panel border-r border-white/20 shadow-xl z-40 hidden md:flex flex-col p-4 gap-4 animate-slide-in-right">
+          <aside className="fixed left-0 top-0 h-screen w-64 glass-panel border-r border-white/20 shadow-xl z-45 hidden md:flex flex-col p-4 gap-4 animate-slide-in-right">
             <div className="mb-8 px-2 flex items-center gap-3">
               <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
                 <span className="material-symbols-outlined font-bold">restaurant</span>
@@ -119,8 +127,12 @@ function App() {
                 <span className="font-label-md">Ingredients</span>
               </button>
               <button 
-                onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
+                onClick={() => { clear(); setCurrentView('history'); }}
+                className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
+                  currentView === 'history' 
+                    ? 'bg-primary-container text-white shadow-inner font-bold' 
+                    : 'text-on-surface-variant hover:bg-surface-container-high'
+                }`}
               >
                 <span className="material-symbols-outlined">history</span>
                 <span className="font-label-md">History Archive</span>
@@ -143,7 +155,7 @@ function App() {
         <main className={`flex-1 flex flex-col h-full relative ${isDashboardLayout ? 'ml-0 md:ml-64 overflow-hidden' : ''}`}>
           
           {/* Top navigation Header Bar */}
-          <header className="sticky top-0 z-30 glass-panel shadow-sm px-container-padding py-4 flex justify-between items-center w-full">
+          <header className="sticky top-0 z-35 glass-panel shadow-sm px-container-padding py-4 flex justify-between items-center w-full">
             <div className="flex items-center gap-8">
               <span 
                 onClick={handleReset}
@@ -173,8 +185,12 @@ function App() {
                   Kitchen Workspace
                 </button>
                 <button 
-                  onClick={() => setIsDrawerOpen(true)}
-                  className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md border-none bg-transparent cursor-pointer"
+                  onClick={() => { clear(); setCurrentView('history'); }}
+                  className={`font-body-md text-body-md transition-colors border-none bg-transparent cursor-pointer ${
+                    currentView === 'history' 
+                      ? 'text-primary font-bold border-b-2 border-primary pb-1' 
+                      : 'text-on-surface-variant hover:text-primary'
+                  }`}
                 >
                   History
                 </button>
@@ -199,7 +215,7 @@ function App() {
           </header>
 
           {/* Dynamic Content Views */}
-          {currentView === 'landing' ? (
+          {currentView === 'landing' && (
             /* PAGE 1: SPLASH LANDING VIEW */
             <div className="flex-1 overflow-y-auto pt-16 pb-12">
               <section className="max-w-4xl mx-auto text-center px-margin-mobile mb-24 animate-scale-in">
@@ -354,8 +370,10 @@ function App() {
                 </div>
               </footer>
             </div>
-          ) : (
-            /* PAGE 2: INTERACTIVE KITCHEN WORKSPACE & BENTO GRID */
+          )}
+
+          {currentView === 'kitchen' && (
+            /* PAGE 2 & 3: INTERACTIVE KITCHEN WORKSPACE & RECIPE DETAIL */
             <div className="flex-grow overflow-y-auto p-8 lg:p-12">
               <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 h-full items-start">
                 
@@ -606,6 +624,13 @@ function App() {
             </div>
           )}
 
+          {currentView === 'history' && (
+            /* PAGE 4: FULL ARCHIVE HISTORY BENTO VIEW */
+            <div className="flex-1 overflow-y-auto">
+              <HistoryView onSelectRecipe={handleHistorySelection} />
+            </div>
+          )}
+
         </main>
       </div>
 
@@ -613,7 +638,7 @@ function App() {
       <HistoryDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onSelectRecipe={loadRecipeFromHistory}
+        onSelectRecipe={handleHistorySelection}
       />
     </div>
   );
