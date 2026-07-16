@@ -455,7 +455,7 @@ function App() {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-gutter max-w-[1440px] mx-auto">
                   <div className="flex flex-col gap-2 text-center md:text-left">
                     <span className="font-headline-md text-primary font-bold">TadkaMode AI</span>
-                    <p className="font-body-md text-body-md text-on-surface-variant">© 2024 TadkaMode AI. Premium Culinary Precision.</p>
+                    <p className="font-body-md text-body-md text-on-surface-variant">© 2026 TadkaMode AI. Premium Culinary Precision.</p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-8">
                     <a className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md hover:underline" href="#">Privacy Policy</a>
@@ -719,7 +719,7 @@ function App() {
               
               {/* Footer (Shared) */}
               <footer className="w-full py-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-lowest/40 backdrop-blur-md border-t border-outline-variant/10 rounded-2xl p-6">
-                <span className="font-body-md text-on-surface-variant/70 text-center md:text-left text-xs">© 2024 TadkaMode AI. Premium Culinary Precision.</span>
+                <span className="font-body-md text-on-surface-variant/70 text-center md:text-left text-xs">© 2026 TadkaMode AI. Premium Culinary Precision.</span>
                 <div className="flex gap-8">
                   <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Privacy Policy</a>
                   <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Terms of Service</a>
