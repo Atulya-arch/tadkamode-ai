@@ -19,6 +19,7 @@ function App() {
   const [onlyFavoritesView, setOnlyFavoritesView] = useState(false);
   const [user, setUser] = useState(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -28,6 +29,14 @@ function App() {
       }
     };
     checkSession();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarOpen(window.innerWidth >= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
   const [customInputOpen, setCustomInputOpen] = useState(false);
   const [newCustomTag, setNewCustomTag] = useState('');
@@ -118,9 +127,19 @@ function App() {
       {/* Main Layout Grid */}
       <div className={`flex flex-1 ${isDashboardLayout ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
         
+        {/* Mobile backdrop overlay */}
+        {isDashboardLayout && sidebarOpen && (
+          <div 
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-35"
+          />
+        )}
+
         {/* Sticky Sidebar Navigation (Anchor) - exact Stitch styling */}
         {isDashboardLayout && (
-          <aside className="fixed left-0 top-0 h-screen w-64 glass-panel border-r border-white/20 shadow-xl z-45 hidden md:flex flex-col p-4 gap-4 animate-slide-in-right">
+          <aside className={`fixed left-0 top-0 h-screen bg-surface-container-lowest glass-panel border-r border-white/20 shadow-xl z-45 flex flex-col p-4 gap-4 transition-all duration-300 ${
+            sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full p-0 border-r-0 overflow-hidden'
+          }`}>
             {/* Sidebar Brand Header */}
             <div className="mb-6 px-2 flex items-center gap-3">
               <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
@@ -212,12 +231,25 @@ function App() {
         )}
 
         {/* Main Content Area */}
-        <main className={`flex-grow flex flex-col h-full relative ${isDashboardLayout ? 'ml-0 md:ml-64 overflow-hidden' : ''}`}>
+        <main className={`flex-grow flex flex-col h-full relative transition-all duration-300 ${
+          isDashboardLayout && sidebarOpen ? 'ml-0 md:ml-64 overflow-hidden' : 'ml-0 overflow-hidden'
+        }`}>
           
           {/* Top AppBar Header - exact Stitch layout config */}
           <header className="sticky top-0 z-35 glass-panel shadow-sm px-container-padding py-4 flex justify-between items-center w-full">
             {/* Search Input Bar (aligned left) */}
             <div className="flex items-center gap-4 flex-1">
+              {isDashboardLayout && (
+                <button 
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-2.5 rounded-xl hover:bg-surface-container-high text-on-surface transition-all border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
+                  title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+                >
+                  <span className="material-symbols-outlined text-[22px]">
+                    {sidebarOpen ? 'menu_open' : 'menu'}
+                  </span>
+                </button>
+              )}
               <div className="relative w-full max-w-md hidden sm:block">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-60">search</span>
                 <input 
