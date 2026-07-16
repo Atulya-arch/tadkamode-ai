@@ -91,14 +91,22 @@ function App() {
       {/* Shader Background Canvas */}
       <ShaderBackground />
 
+      {/* Floating Background Blobs matching CSS mockup */}
+      <div className="background-blobs pointer-events-none fixed inset-0 overflow-hidden -z-10 opacity-30">
+        <div className="absolute top-[-100px] left-[-50px] w-[500px] h-[500px] bg-[#65d3ff] rounded-full blur-[80px] animate-pulse-slow"></div>
+        <div className="absolute top-[40%] right-[-50px] w-[450px] h-[450px] bg-[#ffdbcc] rounded-full blur-[80px] animate-pulse-slow"></div>
+        <div className="absolute bottom-[-100px] left-[20%] w-[400px] h-[400px] bg-[#e5bfa3] rounded-full blur-[80px] animate-pulse-slow"></div>
+      </div>
+
       {/* Main Layout Grid */}
       <div className={`flex flex-1 ${isDashboardLayout ? 'h-screen overflow-hidden' : 'min-h-screen'}`}>
         
-        {/* Sticky Sidebar Navigation (Anchor) */}
+        {/* Sticky Sidebar Navigation (Anchor) - exact Stitch styling */}
         {isDashboardLayout && (
           <aside className="fixed left-0 top-0 h-screen w-64 glass-panel border-r border-white/20 shadow-xl z-45 hidden md:flex flex-col p-4 gap-4 animate-slide-in-right">
-            <div className="mb-8 px-2 flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white">
+            {/* Sidebar Brand Header */}
+            <div className="mb-6 px-2 flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
                 <span className="material-symbols-outlined font-bold">restaurant</span>
               </div>
               <div>
@@ -107,25 +115,36 @@ function App() {
               </div>
             </div>
             
-            <nav className="flex-grow flex flex-col gap-2">
+            {/* Sidebar Navigation items */}
+            <nav className="flex-grow flex flex-col gap-1">
               <button 
                 onClick={() => setCurrentView('landing')}
                 className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
               >
                 <span className="material-symbols-outlined">home</span>
-                <span className="font-label-md">Home</span>
+                <span className="font-label-md text-xs">Home</span>
               </button>
+              
               <button 
                 onClick={() => { clear(); setCurrentView('kitchen'); }}
                 className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
-                  currentView === 'kitchen' 
+                  currentView === 'kitchen' && status === 'idle'
                     ? 'bg-primary-container text-white shadow-inner font-bold' 
                     : 'text-on-surface-variant hover:bg-surface-container-high'
                 }`}
               >
                 <span className="material-symbols-outlined">restaurant</span>
-                <span className="font-label-md">Ingredients</span>
+                <span className="font-label-md text-xs">Ingredients</span>
               </button>
+
+              <button 
+                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
+                onClick={() => { clear(); setCurrentView('kitchen'); }}
+              >
+                <span className="material-symbols-outlined">kitchen</span>
+                <span className="font-label-md text-xs">Pantry</span>
+              </button>
+
               <button 
                 onClick={() => { clear(); setCurrentView('history'); }}
                 className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
@@ -135,38 +154,63 @@ function App() {
                 }`}
               >
                 <span className="material-symbols-outlined">history</span>
-                <span className="font-label-md">History Archive</span>
+                <span className="font-label-md text-xs">History</span>
+              </button>
+
+              <button 
+                onClick={() => setIsDrawerOpen(true)}
+                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
+              >
+                <span className="material-symbols-outlined">favorite</span>
+                <span className="font-label-md text-xs">Favorites</span>
               </button>
             </nav>
             
-            <div className="mt-auto border-t border-outline-variant/30 pt-4 flex flex-col gap-2">
+            {/* Sidebar footer controls */}
+            <div className="mt-auto border-t border-outline-variant/30 pt-4 flex flex-col gap-1">
+              <button 
+                onClick={() => {}}
+                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all border-none bg-transparent cursor-pointer text-left w-full"
+              >
+                <span className="material-symbols-outlined">help</span>
+                <span className="font-label-md text-xs">Help</span>
+              </button>
               <button 
                 onClick={handleReset}
                 className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-all border-none bg-transparent cursor-pointer text-left w-full"
               >
                 <span className="material-symbols-outlined text-error">logout</span>
-                <span className="font-label-md">Reset Kitchen</span>
+                <span className="font-label-md text-xs text-error">Logout</span>
               </button>
             </div>
           </aside>
         )}
 
         {/* Main Content Area */}
-        <main className={`flex-1 flex flex-col h-full relative ${isDashboardLayout ? 'ml-0 md:ml-64 overflow-hidden' : ''}`}>
+        <main className={`flex-grow flex flex-col h-full relative ${isDashboardLayout ? 'ml-0 md:ml-64 overflow-hidden' : ''}`}>
           
-          {/* Top navigation Header Bar */}
+          {/* Top AppBar Header - exact Stitch layout config */}
           <header className="sticky top-0 z-35 glass-panel shadow-sm px-container-padding py-4 flex justify-between items-center w-full">
-            <div className="flex items-center gap-8">
-              <span 
-                onClick={handleReset}
-                className="text-headline-md font-headline-md font-black text-primary cursor-pointer select-none"
-              >
-                TadkaMode AI
-              </span>
-              <nav className="hidden md:flex gap-8">
+            {/* Search Input Bar (aligned left) */}
+            <div className="flex items-center gap-4 flex-1">
+              <div className="relative w-full max-w-md hidden sm:block">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-60">search</span>
+                <input 
+                  className="w-full bg-surface-container-low border-none rounded-2xl py-2.5 pl-11 pr-4 focus:ring-2 focus:ring-primary-container text-body-md transition-all placeholder:text-on-surface-variant/40 focus:outline-none" 
+                  placeholder="Search recipes, ingredients..." 
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Navigation and Profile Actions (aligned right) */}
+            <div className="flex items-center gap-6">
+              <div className="hidden lg:flex items-center gap-6 mr-6">
                 <button 
                   onClick={() => setCurrentView('landing')}
-                  className={`font-body-md text-body-md transition-colors border-none bg-transparent cursor-pointer ${
+                  className={`font-label-md text-xs transition-colors border-none bg-transparent cursor-pointer ${
                     currentView === 'landing' 
                       ? 'text-primary font-bold border-b-2 border-primary pb-1' 
                       : 'text-on-surface-variant hover:text-primary'
@@ -176,40 +220,44 @@ function App() {
                 </button>
                 <button 
                   onClick={() => { clear(); setCurrentView('kitchen'); }}
-                  className={`font-body-md text-body-md transition-colors border-none bg-transparent cursor-pointer ${
+                  className={`font-label-md text-xs transition-colors border-none bg-transparent cursor-pointer ${
                     currentView === 'kitchen' 
                       ? 'text-primary font-bold border-b-2 border-primary pb-1' 
                       : 'text-on-surface-variant hover:text-primary'
                   }`}
                 >
-                  Kitchen Workspace
+                  Kitchen
                 </button>
                 <button 
                   onClick={() => { clear(); setCurrentView('history'); }}
-                  className={`font-body-md text-body-md transition-colors border-none bg-transparent cursor-pointer ${
+                  className={`font-label-md text-xs transition-colors border-none bg-transparent cursor-pointer ${
                     currentView === 'history' 
                       ? 'text-primary font-bold border-b-2 border-primary pb-1' 
                       : 'text-on-surface-variant hover:text-primary'
                   }`}
                 >
-                  History
+                  Community
                 </button>
-              </nav>
-            </div>
-            
-            <div className="flex items-center gap-4">
+              </div>
+              
               <button 
                 onClick={() => { clear(); setCurrentView('kitchen'); }}
-                className="bg-primary text-on-primary font-label-md text-label-md px-6 py-2.5 rounded-full hover:scale-105 transition-transform active:scale-95 premium-shadow cursor-pointer border-none"
+                className="flex items-center gap-2 font-label-md text-xs text-primary px-4 py-2 rounded-full hover:bg-primary/5 transition-all border-none bg-transparent cursor-pointer font-bold"
               >
-                Create Recipe
+                <span className="material-symbols-outlined text-sm">add_circle</span>
+                <span>Create Recipe</span>
               </button>
-              <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center cursor-pointer overflow-hidden border-2 border-white">
-                <img 
-                  className="w-full h-full object-cover" 
-                  alt="chef-profile"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuByIXi95glGh2AEndY1L05OpPwfJkiJvF4h3_1J-8vWfbYcinXwtzhJFr8kuP4m8AIxdOytd60FV26_2ydnspbJlXAqeBOagNAASi5iDtSvcDOkspDXcU3qpA0G3baoB878tvJeM7-irrPumcrAMMQ4hoEGobTRNEtrEPwJqmGZUkGbTp2V7eaMLgF8PqAgbsN641nLj5bpfVaGoaGX-FcTI77W_YTeTuWniSb5CQSsU0qACoEeb1F4nQ"
-                />
+              
+              {/* User profile with name Alexandra and border-primary-container */}
+              <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30">
+                <span className="hidden sm:inline font-label-md font-semibold text-xs text-on-surface">Alexandra</span>
+                <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden cursor-pointer shadow-sm">
+                  <img 
+                    className="w-full h-full object-cover" 
+                    alt="Alexandra chef profile"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCxr4L6kX_Db8tqV7gLQl0KHXvtk1XkBsHs88diiytMxy8CJICOsqRq2zh3vcAy3-uFraw43y5iwBZvJ_Ef0UuHz3mOWSIeIAteaH3l8ref0Jdud9ncBV_QRVVlk69AQeNiMkVsjlZXixj2TT7lHkW-1LxrpKIyQ_2LEq66MbEq3Mu4uTkGTeEdnjK7LU8KTPEv_a5FypH2JEd0xrKC29JQ7qLF7P_renFZvdM2GBqef654IeSSHsG_w"
+                  />
+                </div>
               </div>
             </div>
           </header>
@@ -380,8 +428,8 @@ function App() {
                 {/* Left Panel: Ingredient Categorized Selectors */}
                 <section className="lg:col-span-5 flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
-                    <h2 className="font-headline-lg text-on-surface">Kitchen Inventory</h2>
-                    <p className="text-body-md text-on-surface-variant">Select ingredients available in your pantry. AI Chef will generate matches.</p>
+                    <h2 className="font-headline-lg text-on-surface">Good morning, Alexandra</h2>
+                    <p className="text-body-lg text-on-surface-variant">What's in your kitchen today? Let's build a masterpiece.</p>
                   </div>
 
                   <div className="glass-panel p-8 rounded-[32px] flex flex-col gap-8 shadow-[0_20px_40px_rgba(0,0,0,0.03)] border-white/40">
