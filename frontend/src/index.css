@@ -83,3 +83,28 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(140, 113, 102, 0.6);
 }
+
+.background-blobs {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  filter: blur(80px);
+  opacity: 0.15;
+  border-radius: 50%;
+  animation: move 20s infinite alternate;
+}
+
+@keyframes move {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(100px, 100px) scale(1.2); }
+}
+

@@ -91,11 +91,11 @@ function App() {
       {/* Shader Background Canvas */}
       <ShaderBackground />
 
-      {/* Floating Background Blobs matching CSS mockup */}
-      <div className="background-blobs pointer-events-none fixed inset-0 overflow-hidden -z-10 opacity-30">
-        <div className="absolute top-[-100px] left-[-50px] w-[500px] h-[500px] bg-[#65d3ff] rounded-full blur-[80px] animate-pulse-slow"></div>
-        <div className="absolute top-[40%] right-[-50px] w-[450px] h-[450px] bg-[#ffdbcc] rounded-full blur-[80px] animate-pulse-slow"></div>
-        <div className="absolute bottom-[-100px] left-[20%] w-[400px] h-[400px] bg-[#e5bfa3] rounded-full blur-[80px] animate-pulse-slow"></div>
+      {/* Background Decoration */}
+      <div className="background-blobs">
+        <div className="blob bg-[#65d3ff] w-[600px] h-[600px] -top-48 -left-24"></div>
+        <div className="blob bg-[#ffdbcc] w-[500px] h-[500px] top-1/2 -right-24"></div>
+        <div className="blob bg-[#e5bfa3] w-[400px] h-[400px] bottom-0 left-1/4"></div>
       </div>
 
       {/* Main Layout Grid */}
@@ -669,6 +669,17 @@ function App() {
                 </section>
 
               </div>
+              
+              {/* Footer (Shared) */}
+              <footer className="w-full py-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-lowest/40 backdrop-blur-md border-t border-outline-variant/10 rounded-2xl p-6">
+                <span className="font-body-md text-on-surface-variant/70 text-center md:text-left text-xs">© 2024 TadkaMode AI. Premium Culinary Precision.</span>
+                <div className="flex gap-8">
+                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Privacy Policy</a>
+                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Terms of Service</a>
+                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Press Kit</a>
+                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Contact Support</a>
+                </div>
+              </footer>
             </div>
           )}
 
@@ -688,6 +699,51 @@ function App() {
         onClose={() => setIsDrawerOpen(false)}
         onSelectRecipe={handleHistorySelection}
       />
+
+      {/* Mobile Navigation (Bottom Bar) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 glass-panel flex items-center justify-around px-6 z-50">
+        <button 
+          onClick={() => setCurrentView('landing')}
+          className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer ${
+            currentView === 'landing' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${currentView === 'landing' ? 'active-icon' : ''}`}>home</span>
+          <span className="text-[10px] font-bold uppercase tracking-tight">Home</span>
+        </button>
+        <button 
+          onClick={() => { clear(); setCurrentView('kitchen'); }}
+          className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer ${
+            currentView === 'kitchen' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${currentView === 'kitchen' ? 'active-icon' : ''}`}>restaurant</span>
+          <span className="text-[10px] uppercase tracking-tight">Cook</span>
+        </button>
+        <button 
+          onClick={() => { clear(); setCurrentView('kitchen'); }}
+          className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer text-on-surface-variant"
+        >
+          <span className="material-symbols-outlined">kitchen</span>
+          <span className="text-[10px] uppercase tracking-tight">Pantry</span>
+        </button>
+        <button 
+          onClick={() => { clear(); setCurrentView('history'); }}
+          className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer ${
+            currentView === 'history' ? 'text-primary' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${currentView === 'history' ? 'active-icon' : ''}`}>favorite</span>
+          <span className="text-[10px] uppercase tracking-tight">Saved</span>
+        </button>
+        <button 
+          onClick={handleReset}
+          className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer text-on-surface-variant"
+        >
+          <span className="material-symbols-outlined">person</span>
+          <span className="text-[10px] uppercase tracking-tight">Profile</span>
+        </button>
+      </nav>
     </div>
   );
 }
