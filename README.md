@@ -1,146 +1,294 @@
-# TadkaMode 🍳 - AI-Powered Fridge-to-Recipe Application
+# TadkaMode AI 🍳
 
-TadkaMode is a production-quality, responsive web application that turns available fridge ingredients into structured, step-by-step cooking recipes. 
+> **Turn whatever's in your fridge into a structured, step-by-step recipe — powered by Groq + Gemini.**
 
-This project goes beyond a standard AI wrapper by showcasing a resilient React architecture, decoupled Express services, strict schema validation via **Zod**, and robust error handling to mitigate unreliable LLM outputs.
+TadkaMode is a frontend internship project built to demonstrate production-grade React architecture, LLM integration, structured JSON handling, robust error handling, and strong product thinking.
+
+---
+
+## 📸 Overview
+
+| Feature | Details |
+|---|---|
+| 🧠 AI Generation | Groq `llama-3.3-70b-versatile` (primary) → Gemini `1.5-flash` (fallback) |
+| 📦 History | Stored in browser `localStorage` — zero database dependency |
+| ⚡ Performance | AbortController cancels stale requests; retry logic on failure |
+| 🛡️ Validation | Zod validates both the API request payload and every LLM JSON response |
+| 🎨 UI | React 19 + Vite 8 + Tailwind CSS v4 — dark, glassmorphic design |
+| 🔐 Security | API keys never leave the backend; Helmet + CORS headers enforced |
+
+---
+
+## 🏗️ Architecture
+
+```
+Browser (React + Vite)
+        │
+        │  POST /api/recipes/generate
+        ▼
+  Express Backend
+        │
+        ├─ Zod validates request payload
+        ├─ Groq API  ──── (primary, 10s timeout)
+        │       └── fails? ──▶  Gemini API  (fallback, 12s timeout)
+        ├─ jsonParser.js extracts JSON from raw LLM text
+        └─ Zod validates response schema → returns clean JSON
+        │
+        ▼
+  Frontend saves recipe to localStorage
+  (recipeHistory.js utility — no DB needed)
+```
+
+The backend is a **pure AI proxy** — its only job is to securely call the LLM and return validated JSON. All persistence is client-side.
+
+---
+
+## 📁 Folder Structure
+
+```
+tadkamode/
+│
+├── backend/
+│   ├── controllers/
+│   │   └── recipe.controller.js     # Validates request, calls AI, returns JSON
+│   ├── routes/
+│   │   └── recipe.routes.js         # Single route: POST /api/recipes/generate
+│   ├── services/
+│   │   └── ai.service.js            # Groq → Gemini fallback orchestration
+│   ├── utils/
+│   │   ├── appError.js              # Centralised operational error class
+│   │   └── jsonParser.js            # Robust LLM JSON extraction & repair
+│   ├── validators/
+│   │   └── recipe.validator.js      # Zod schemas for request & LLM response
+│   ├── server.js                    # Express app setup
+│   └── .env.example                 # Environment variable template
+│
+└── frontend/src/
+    ├── components/
+    │   ├── RecipeView.jsx            # Full interactive recipe display
+    │   ├── HistoryView.jsx           # Bento grid of all past recipes
+    │   ├── HistoryDrawer.jsx         # Slide-out quick access drawer
+    │   ├── PantryView.jsx            # Smart pantry ingredient tracker
+    │   ├── CommunityView.jsx         # Culinary blog / community feed
+    │   ├── RecipeSkeleton.jsx        # Loading skeleton placeholder
+    │   ├── TagInput.jsx              # Ingredient tag input component
+    │   └── ShaderBackground.jsx      # Animated WebGL canvas background
+    ├── hooks/
+    │   └── useRecipeGenerator.js     # AbortController, retry, state machine
+    ├── services/
+    │   └── recipeService.js          # Thin fetch wrapper for POST /generate
+    └── utils/
+        ├── recipeHistory.js          # localStorage CRUD utility
+        └── quantityScaler.js         # Mixed-fraction serving size scaler
+```
+
+---
+
+## ✨ Key Features
+
+### 🤖 AI Recipe Generation
+Type or select ingredients → click **Generate** → get a fully structured recipe including title, description, prep/cook time, servings, difficulty, ingredients with quantities, step-by-step instructions, substitution suggestions, and chef tips.
+
+### 🔄 Groq → Gemini Fallback
+If Groq fails (rate limit, timeout, or API error), the backend **transparently retries** with Gemini Flash — the frontend never sees the failure.
+
+### 🗂️ localStorage History
+Every successfully generated recipe is saved to `localStorage` via `recipeHistory.js`. The History View and History Drawer both read from it — **no network request required** to browse past recipes.
+
+```js
+saveRecipe(recipe, inputIngredients)  // auto-assigns UUID + createdAt
+loadRecipes()                          // returns newest-first array
+deleteRecipe(id)                       // removes by UUID
+clearRecipeHistory()                   // wipes all history
+```
+
+### ⚖️ Dynamic Serving Scaler
+Adjust servings with `+` / `–` buttons in the recipe view. Quantities auto-scale in real time with proper mixed-fraction unicode output: `1 1/2 cups` → `¾ cup`.
+
+### 🛡️ Production Error Handling
+The app handles every failure mode gracefully:
+
+| Failure | Handling |
+|---|---|
+| Empty / malformed JSON from LLM | `jsonParser.js` extracts `{ }` block; fallback to 502 |
+| Schema mismatch (wrong types) | Zod `.coerce` heals type errors; throws validated error message |
+| Network timeout | 10s (Groq) / 12s (Gemini) `Promise.race` timeout |
+| Rate limiting (429) | Triggers Gemini fallback automatically |
+| Empty request body | Zod returns `400 Validation Error` to client |
+| Stale parallel requests | `AbortController` cancels previous in-flight fetch |
+| User retries on error | `retry()` re-runs last ingredient set from hook state |
+
+---
+
+## 🚀 Running Locally
+
+### Prerequisites
+- Node.js **v18+**
+- A [Groq API key](https://console.groq.com/) (free tier available)
+- *(Optional)* A [Gemini API key](https://aistudio.google.com/) for fallback
+
+---
+
+### 1 — Backend
+
+```bash
+cd backend
+npm install
+```
+
+Create a `.env` file:
+
+```env
+PORT=5001
+GROQ_API_KEY=your_groq_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+NODE_ENV=development
+```
+
+Start the server:
+
+```bash
+npm run dev
+# → [Server] TadkaMode backend running on port 5001 (development)
+```
+
+Verify it's alive:
+
+```bash
+curl http://localhost:5001/health
+# → { "status": "healthy" }
+```
+
+---
+
+### 2 — Frontend
+
+```bash
+cd frontend
+npm install
+```
+
+Create a `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5001/api
+```
+
+Start the dev server:
+
+```bash
+npm run dev
+# → http://localhost:5173
+```
+
+---
+
+## 🧪 Testing the App
+
+| Test | How |
+|---|---|
+| **Generate a recipe** | Select ingredients → click Generate |
+| **View history** | Click the history icon in the sidebar or drawer |
+| **Delete a recipe** | Click the trash icon on any recipe card in History View |
+| **Retry on error** | Clear the `GROQ_API_KEY` from `.env` and generate — observe clean error UI and retry button |
+| **Serving scaler** | Use `+` / `−` on the recipe view to watch quantities auto-scale |
+| **Request cancellation** | Spam the Generate button rapidly — old requests are cleanly aborted |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-*   **Core**: React 18, Vite (Fast Hot-Reloading Build Server)
-*   **Styling**: Tailwind CSS v4 (Modern, CSS-first design workflow)
-*   **State**: Custom React hooks (`useRecipeGenerator`), presentational React views
-*   **Iconography**: Lucide React
+| Package | Version | Purpose |
+|---|---|---|
+| React | 19.x | UI framework |
+| Vite | 8.x | Build tool & dev server |
+| Tailwind CSS | 4.x | Utility-first styling |
+| Lucide React | 1.x | Icon library |
 
 ### Backend
-*   **Core**: Node.js, Express
-*   **Database**: MongoDB (via Mongoose)
-*   **Security & Logs**: Helmet (Security headers), CORS, Morgan (Request logging)
-*   **Validation**: Zod (Express payload validations & LLM output validations)
-
-### AI Engines
-*   **Primary**: Groq API (`llama-3.3-70b-versatile` with response format: JSON Object)
-*   **Fallback**: Google Gemini API (`gemini-1.5-flash` with JSON mimeType)
+| Package | Version | Purpose |
+|---|---|---|
+| Express | 4.x | HTTP server |
+| Groq SDK | 0.3.x | Primary LLM (Llama 3.3 70B) |
+| @google/generative-ai | 0.11.x | Fallback LLM (Gemini 1.5 Flash) |
+| Zod | 3.x | Schema validation |
+| Helmet | 7.x | HTTP security headers |
+| Morgan | 1.x | Request logging |
+| dotenv | 16.x | Environment config |
 
 ---
 
-## 🏛️ System Architecture & Concern Separation
+## 🔌 API Reference
 
-The codebase is built with strict architectural boundaries. Business logic is completely decoupled from components:
+### `POST /api/recipes/generate`
 
-```
-tadkamode/
-├── backend/                  # Node.js + Express Backend
-│   ├── config/               # DB connection and mongoose initializers
-│   ├── controllers/          # HTTP request handlers & Zod body checks
-│   ├── models/               # MongoDB Mongoose schemas & indexes
-│   ├── routes/               # Express routing mappings
-│   ├── services/             # Core business logic (AI calls & DB writes)
-│   ├── utils/                # Central AppError custom classes & JSON parsers
-│   └── validators/           # Zod schema definitions (LLM & client inputs)
-│
-├── frontend/                 # Vite + React Frontend
-│   ├── src/
-│   │   ├── components/       # Presentational UI components (TagInput, RecipeView, Skeletons)
-│   │   ├── hooks/            # Custom hooks encapsulating state machinery (useRecipeGenerator)
-│   │   ├── services/         # API HTTP fetch service wrappers with AbortSignals
-│   │   └── utils/            # Real-time mixed fraction math scalers
+Generates a recipe from a list of ingredients.
+
+**Request:**
+```json
+{
+  "ingredients": ["eggs", "tomatoes", "paneer", "cumin"]
+}
 ```
 
----
+**Response `200`:**
+```json
+{
+  "status": "success",
+  "data": {
+    "recipe": {
+      "title": "Paneer & Egg Bhurji",
+      "description": "A quick, protein-rich Indian scramble...",
+      "prepTime": "5 mins",
+      "cookTime": "10 mins",
+      "servings": 2,
+      "difficulty": "Easy",
+      "ingredients": [
+        { "name": "Paneer", "quantity": "200g", "optional": false }
+      ],
+      "steps": [
+        { "step": 1, "instruction": "Crumble the paneer..." }
+      ],
+      "substitutions": [
+        { "ingredient": "Paneer", "alternatives": ["Tofu", "Cottage Cheese"] }
+      ],
+      "tips": ["Add a squeeze of lemon at the end for brightness."]
+    }
+  }
+}
+```
 
-## 🛡️ Production-Grade AI Resiliency Strategies
-
-LLMs are inherently non-deterministic. TadkaMode implements five distinct levels of safety to guarantee the app **never crashes** and **never displays raw model conversational text**:
-
-1.  **Dual-Engine Provider Fallback**: The primary request hits **Groq** for sub-second generation speeds. If Groq times out (exceeds 10s), returns a 429 rate limit, or fails, the service transparently catches the error and retries the request using **Gemini 1.5 Flash**.
-2.  **Regular Expression JSON Repair**: If the model ignores instructions and wraps the JSON output inside markdown code blocks (e.g. ` ```json ... ``` `) or prepends greeting messages, our custom parser [jsonParser.js](backend/utils/jsonParser.js) extracts content between the first `{` and last `}` prior to parsing.
-3.  **Zod Schema Type Coercion**: Models often return numbers as strings (e.g. `"servings": "3"`). We use Zod's `.coerce.number()` to automatically heal these type mismatches instead of throwing errors.
-4.  **Resilient Database Writes**: Generated recipes are saved to MongoDB Atlas history. If the database connection drops, the service catches the error, logs a warning, and still returns the recipe to the user.
-5.  **Race Condition Cancellation**: If a user submits multiple prompts quickly, the custom React hook aborts the active fetch request using `AbortController` and rejects the response, ensuring old queries never overwrite newer ones.
-
----
-
-## 🚀 How to Run locally
-
-### Prerequisites
-*   Node.js (v18.0.0 or higher)
-*   MongoDB Instance (Local server or MongoDB Atlas string)
-
-### 1. Backend Setup
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Create a `.env` file from the template:
-    ```bash
-    cp .env.example .env
-    ```
-4.  Fill in your API keys and MongoDB connection string in `.env`:
-    ```env
-    PORT=5001
-    MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/tadkamode
-    GROQ_API_KEY=your_groq_key_here
-    GEMINI_API_KEY=your_gemini_key_here
-    NODE_ENV=development
-    ```
-5.  Start the server with hot-reloading (nodemon):
-    ```bash
-    npm run dev
-    ```
-
-### 2. Frontend Setup
-1.  Navigate to the frontend directory:
-    ```bash
-    cd ../frontend
-    ```
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-3.  Create a `.env` file pointing to the backend PORT:
-    ```env
-    VITE_API_URL=http://localhost:5001/api
-    ```
-4.  Start the development server:
-    ```bash
-    npm run dev
-    ```
-5.  Open **http://localhost:5173** in your browser.
+**Error `400`** — missing or empty ingredients  
+**Error `502`** — both AI providers failed or returned invalid JSON  
 
 ---
 
-## 🧪 Verification & Manual Testing
-*   **Mock Verification**: Click "Generate Mock Recipe" to run a complete round-trip API test. It checks the Zod validator on the backend and custom quantity scaler on the frontend using local mock schemas.
-*   **Error Boundaries**: Clear all API keys from the backend `.env` and trigger a generation. The frontend will render a clean, red error card showing a `502 Bad Gateway` detailing fallback key errors.
-*   **Quantity Scaling**: Click the `+` or `-` buttons on the serving selector in `RecipeView` to watch mixed fractions (`1 1/2 cups`) scale dynamically to unicode fractions (like `¾` or `3`).
+### `GET /health`
+
+```json
+{ "status": "healthy", "timestamp": "2026-07-16T17:30:00.000Z", "env": "development" }
+```
 
 ---
 
-## 📊 Internship Metadata & Disclosures
+## 📌 Known Limitations
 
-### Time Spent
-*   **Total**: ~5 hours
-    *   Phase 1 (Express & Zod Baseline): 1 hr
-    *   Phase 2 (Resilient AI fallback & Repair): 1 hr
-    *   Phase 3 (Vite, Tailwind v4 Setup & Cancellation Hook): 1 hr
-    *   Phase 4 (Tag Inventory & Skeleton loader): 1 hr
-    *   Phase 5 (Checklist & Mixed Fraction Scaler): 1 hr
-    *   Phase 6 (MongoDB Atlas integrations & Drawer): 1 hr
+- **Unit conversion**: Scaling `3 tsp` to 3× gives `9 tsp` instead of `3 tbsp`. Numeric scaling is accurate; unit normalisation is not implemented.
+- **localStorage cap**: History is capped at 50 recipes (~3–5 KB each) to stay within the browser's 5 MB limit.
+- **LLM non-determinism**: Groq/Gemini may occasionally return unusual ingredient combinations — the Zod validator ensures the structure is always valid even if the content is creative.
 
-### AI Usage Disclosure
-This project was constructed in a pair-programming sandbox under the architectural guidance of **Antigravity AI**, a Google DeepMind agentic coding assistant. All files, custom parsers, and error boundaries were written incrementally and manually verified.
+---
 
-### Known Limitations
-*   *Unit-Specific Scaling*: Scaling works on numeric prefixes but does not convert units (e.g. it scales "3 tsp" to "9 tsp" instead of converting to "3 tbsp").
-*   *Internet dependency*: Fallbacks require external API access. Offline testing relies on the mock endpoints.
+## 🔮 Future Improvements
 
-### Future Improvements
-*   *Fuzzy Search Inventory*: Integrate autocomplete suggestions for common ingredients to speed up tag typing.
-*   *Scale Conversion*: Automatically convert units (e.g., cups to ml, teaspoons to tablespoons) when scaling above threshold values.
+- Fuzzy ingredient autocomplete (e.g. typing "tom" → suggests "Tomatoes", "Tomato Paste")
+- Unit-aware serving scaler (tbsp ↔ tsp ↔ ml conversions)
+- Export recipe as PDF or share via link
+- Dietary filter tags (vegan, gluten-free, low-carb) passed as prompt constraints
+
+---
+
+## 📄 License
+
+MIT © 2026 TadkaMode AI
