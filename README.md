@@ -286,9 +286,3 @@ Generates a recipe from a list of ingredients.
 - Unit-aware serving scaler (tbsp ↔ tsp ↔ ml conversions)
 - Export recipe as PDF or share via link
 - Dietary filter tags (vegan, gluten-free, low-carb) passed as prompt constraints
-
----
-
-## 📄 License
-
-MIT © 2026 TadkaMode AI
