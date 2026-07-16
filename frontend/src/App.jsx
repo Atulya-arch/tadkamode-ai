@@ -141,14 +141,25 @@ function App() {
             sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full p-0 border-r-0 overflow-hidden'
           }`}>
             {/* Sidebar Brand Header */}
-            <div className="mb-6 px-2 flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
-                <span className="material-symbols-outlined font-bold">restaurant</span>
+            <div className="mb-6 px-2 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
+                  <span className="material-symbols-outlined font-bold">restaurant</span>
+                </div>
+                <div>
+                  <h1 className="font-headline-md text-primary leading-tight text-sm font-black">Tadka Kitchen</h1>
+                  <p className="text-[11px] text-on-surface-variant/70 font-bold uppercase tracking-wider">AI Chef Active</p>
+                </div>
               </div>
-              <div>
-                <h1 className="font-headline-md text-primary leading-tight text-sm font-black">Tadka Kitchen</h1>
-                <p className="text-[11px] text-on-surface-variant/70 font-bold uppercase tracking-wider">AI Chef Active</p>
-              </div>
+              <button 
+                onClick={() => setSidebarOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface transition-all border-none bg-transparent cursor-pointer flex items-center justify-center"
+                title="Collapse Sidebar"
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  menu_open
+                </span>
+              </button>
             </div>
             
             {/* Sidebar Navigation items */}
@@ -239,14 +250,14 @@ function App() {
           <header className="sticky top-0 z-35 glass-panel shadow-sm px-container-padding py-4 flex justify-between items-center w-full">
             {/* Search Input Bar (aligned left) */}
             <div className="flex items-center gap-4 flex-1">
-              {isDashboardLayout && (
+              {isDashboardLayout && !sidebarOpen && (
                 <button 
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2.5 rounded-xl hover:bg-surface-container-high text-on-surface transition-all border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0"
-                  title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+                  onClick={() => setSidebarOpen(true)}
+                  className="p-2.5 rounded-xl hover:bg-surface-container-high text-on-surface transition-all border-none bg-transparent cursor-pointer flex items-center justify-center shrink-0 animate-scale-in"
+                  title="Expand Sidebar"
                 >
                   <span className="material-symbols-outlined text-[22px]">
-                    {sidebarOpen ? 'menu_open' : 'menu'}
+                    menu
                   </span>
                 </button>
               )}
