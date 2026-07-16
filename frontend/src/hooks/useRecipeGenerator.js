@@ -3,7 +3,7 @@ import { recipeService } from '../services/recipeService';
 
 /**
  * Custom React hook to orchestrate recipe generation API calls, 
- * loading states, error handling, retries, and request cancellations.
+ * loading states, error handling, retries, history reloading, and request cancellations.
  */
 export const useRecipeGenerator = () => {
   const [recipe, setRecipe] = useState(null);
@@ -23,6 +23,9 @@ export const useRecipeGenerator = () => {
     };
   }, []);
 
+  /**
+   * Generates a new recipe from ingredient inventory
+   */
   const generate = useCallback(async (ingredientsList, useMock = false) => {
     // 1. Cancel previous pending request to prevent race conditions
     if (activeControllerRef.current) {
@@ -56,13 +59,50 @@ export const useRecipeGenerator = () => {
     } catch (err) {
       // Catch and isolate cancellation events (AbortError)
       if (err.name === 'AbortError') {
-        // Do not update state; let the newer request override it
         return;
       }
 
       // Update state for actual failures
       if (!controller.signal.aborted) {
         setError(err.message || 'An unexpected error occurred. Please try again.');
+        setStatus('error');
+        activeControllerRef.current = null;
+      }
+    }
+  }, []);
+
+  /**
+   * Loads a full recipe from history by ID
+   */
+  const loadRecipeFromHistory = useCallback(async (recipeId) => {
+    // 1. Cancel previous pending request to prevent race conditions
+    if (activeControllerRef.current) {
+      console.log('[useRecipeGenerator] Cancelling pending request...');
+      activeControllerRef.current.abort();
+    }
+
+    // 2. Create a new controller for this request
+    const controller = new AbortController();
+    activeControllerRef.current = controller;
+
+    // 3. Update loading states
+    setStatus('loading');
+    setError(null);
+
+    try {
+      const data = await recipeService.getRecipeById(recipeId, controller.signal);
+      
+      // Only update state if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setRecipe(data);
+        setStatus('success');
+        activeControllerRef.current = null;
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      
+      if (!controller.signal.aborted) {
+        setError(err.message || 'Failed to reload historical recipe.');
         setStatus('error');
         activeControllerRef.current = null;
       }
@@ -92,8 +132,10 @@ export const useRecipeGenerator = () => {
     error,
     lastIngredients,
     generate,
+    loadRecipeFromHistory,
     retry,
     clear,
     isLoading: status === 'loading'
   };
 };
+export default useRecipeGenerator;

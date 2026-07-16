@@ -6,10 +6,6 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
 export const recipeService = {
   /**
    * Triggers a live recipe generation from the ingredients list
-   * 
-   * @param {Array<string>} ingredients - List of ingredients (e.g. ['rice', 'cheese'])
-   * @param {AbortSignal} signal - AbortSignal to cancel active requests
-   * @returns {Promise<object>} Generated recipe object
    */
   async generateRecipe(ingredients, signal) {
     try {
@@ -66,7 +62,7 @@ export const recipeService = {
   },
 
   /**
-   * Fetches recipe generation history (Phase 6 feature)
+   * Fetches recipe generation history list summaries
    */
   async getHistory(signal) {
     try {
@@ -88,6 +84,34 @@ export const recipeService = {
     } catch (error) {
       if (error.name === 'AbortError') {
         console.log('[Recipe Service] History request cancelled.');
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Fetches full recipe detail by ID to reload it
+   */
+  async getRecipeById(id, signal) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch recipe details.');
+      }
+
+      return result.data.recipe;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('[Recipe Service] Recipe detail request cancelled.');
       }
       throw error;
     }

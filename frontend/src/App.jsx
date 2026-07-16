@@ -3,11 +3,13 @@ import { useRecipeGenerator } from './hooks/useRecipeGenerator';
 import { TagInput } from './components/TagInput';
 import { RecipeSkeleton } from './components/RecipeSkeleton';
 import { RecipeView } from './components/RecipeView';
-import { ChefHat, RotateCw, AlertTriangle, Play, Sparkles } from 'lucide-react';
+import { HistoryDrawer } from './components/HistoryDrawer';
+import { ChefHat, RotateCw, AlertTriangle, Play, Sparkles, History } from 'lucide-react';
 
 function App() {
   const [ingredients, setIngredients] = useState(['rice', 'onion', 'tomatoes', 'cheese', 'mushrooms']);
-  const { recipe, status, error, generate, retry, clear, isLoading } = useRecipeGenerator();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { recipe, status, error, generate, loadRecipeFromHistory, retry, clear, isLoading } = useRecipeGenerator();
 
   const handleGenerate = (useMock) => {
     if (ingredients.length === 0) return;
@@ -30,6 +32,16 @@ function App() {
               <p className="text-xs text-slate-400 font-medium">Turn ingredients into recipes</p>
             </div>
           </div>
+
+          {/* History Drawer Toggle Button */}
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-slate-700 transition-all font-bold text-xs text-slate-300 hover:text-white cursor-pointer"
+            title="Open Recipe History"
+          >
+            <History className="w-4 h-4 text-slate-400" />
+            <span>History</span>
+          </button>
         </div>
       </header>
 
@@ -65,7 +77,7 @@ function App() {
                   type="button"
                   onClick={() => handleGenerate(true)}
                   disabled={isLoading || ingredients.length === 0}
-                  className="flex-1 bg-slate-900 hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-slate-905 text-slate-300 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer disabled:cursor-not-allowed"
+                  className="flex-1 bg-slate-900 hover:bg-slate-850 disabled:opacity-40 disabled:hover:bg-slate-900 text-slate-350 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 border border-slate-800 hover:border-slate-700 transition-all cursor-pointer disabled:cursor-not-allowed"
                 >
                   {isLoading ? <RotateCw className="w-4 h-4 animate-spin text-slate-450" /> : <Play className="w-4 h-4 text-slate-450" />}
                   Generate Mock Recipe
@@ -104,7 +116,7 @@ function App() {
           {status === 'loading' && <RecipeSkeleton />}
 
           {status === 'error' && (
-            <div className="bg-red-955/20 border border-red-500/20 rounded-2xl p-6 flex flex-col gap-4 animate-scale-in">
+            <div className="bg-red-950/20 border border-red-500/20 rounded-2xl p-6 flex flex-col gap-4 animate-scale-in">
               <div className="flex items-start gap-4">
                 <div className="p-2.5 bg-red-500/10 rounded-xl text-red-400 border border-red-500/20">
                   <AlertTriangle className="w-6 h-6 stroke-[2]" />
@@ -128,6 +140,13 @@ function App() {
           )}
         </section>
       </main>
+
+      {/* History Drawer Slider */}
+      <HistoryDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSelectRecipe={loadRecipeFromHistory}
+      />
     </div>
   );
 }

@@ -3,10 +3,16 @@ import * as recipeController from '../controllers/recipe.controller.js';
 
 const router = express.Router();
 
-// Route for generation
+// Generate recipe
 router.post('/generate', recipeController.generateRecipe);
 
-// Route for testing mock schema directly
+// Get mock recipe for testing
 router.get('/mock', recipeController.getMockRecipe);
+
+// Get history list summaries
+router.get('/history', recipeController.getRecipeHistory);
+
+// Get a single recipe by ID
+router.get('/history/:id', recipeController.getRecipeById);
 
 export default router;
