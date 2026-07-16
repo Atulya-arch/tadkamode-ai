@@ -6,6 +6,7 @@ import { HistoryDrawer } from './components/HistoryDrawer';
 import { ShaderBackground } from './components/ShaderBackground';
 import { HistoryView } from './components/HistoryView';
 import { PantryView } from './components/PantryView';
+import { CommunityView } from './components/CommunityView';
 import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
@@ -239,9 +240,9 @@ function App() {
                   Kitchen
                 </button>
                 <button 
-                  onClick={() => { clear(); setOnlyFavoritesView(false); setCurrentView('history'); }}
+                  onClick={() => { clear(); setCurrentView('community'); }}
                   className={`font-label-md text-xs transition-colors border-none bg-transparent cursor-pointer ${
-                    currentView === 'history' && !onlyFavoritesView
+                    currentView === 'community' 
                       ? 'text-primary font-bold border-b-2 border-primary pb-1' 
                       : 'text-on-surface-variant hover:text-primary'
                   }`}
@@ -711,6 +712,13 @@ function App() {
                 setIngredients={setIngredients}
                 setCurrentView={setCurrentView}
               />
+            </div>
+          )}
+
+          {currentView === 'community' && (
+            /* PAGE 6: GLOBAL COMMUNITY SOCIAL FEED & BLOG VIEW */
+            <div className="flex-1 overflow-y-auto">
+              <CommunityView />
             </div>
           )}
 

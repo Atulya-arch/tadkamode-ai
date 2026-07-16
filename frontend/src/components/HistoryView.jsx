@@ -1,52 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { recipeService } from '../services/recipeService';
-import { RotateCw, AlertTriangle, Clock, BookOpen, User, ArrowLeft } from 'lucide-react';
-
-// Static Editorial Blog Posts matching the TadkaMode design system
-const BLOG_POSTS = [
-  {
-    id: 'art-of-tadka',
-    title: 'The Art of Tadka: Oil-Tempering Spices',
-    excerpt: 'Tempering spices in hot oil is the secret behind Indian culinary depth. Discover the science and correct sequencing of blooming spices.',
-    category: 'Techniques',
-    author: 'Chef Vikram',
-    readTime: '5 min read',
-    image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&q=80&w=600",
-    content: [
-      "Tadka—also known as tempering, chhonk, or vaghar—is the ultimate signature of Indian culinary science. It is a cooking technique in which whole spices (such as mustard seeds, cumin seeds, dried red chilies, and curry leaves) are briefly roasted in hot oil or ghee to release their essential oils and intensify their flavors.",
-      "Why does it work? The flavor compounds in spices are lipophilic, meaning they are fat-soluble. Blooming them in hot fat extracts these aromatic compounds and binds them to the fat, which acts as a carrier, distributing the flavor evenly throughout the entire dish.",
-      "The Golden Rule of Tempering: Sequencing is everything. Always start with hard whole spices that take longer to cook, such as mustard seeds (which must pop) and cumin, followed by fresh aromatics like chopped ginger, garlic, and curry leaves, and finish with ground powder spices (like turmeric or red chili) at the very end to prevent burning. Remember, a burnt tadka ruins the entire dish!"
-    ]
-  },
-  {
-    id: 'mastering-saffron',
-    title: 'Mastering Saffron: Blooming the Golden Threads',
-    excerpt: 'Saffron is the world\'s most precious spice. Learn the correct technique to bloom saffron for maximum aroma and vibrant color distribution.',
-    category: 'Ingredients',
-    author: 'Chef Vikram',
-    readTime: '4 min read',
-    image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&q=80&w=600",
-    content: [
-      "Saffron is harvested from the stigma of the Crocus sativus flower, and it takes over 75,000 flowers to produce just a single pound of threads, making it the most expensive spice by weight in the world. It provides a unique floral-honey flavor and a deep orange-yellow hue.",
-      "A common mistake is throwing dry saffron threads directly into boiling food. This locks the flavor inside and leads to uneven yellow spots. To get the maximum output from your saffron, you must 'bloom' it.",
-      "How to Bloom Saffron: Grind a pinch of saffron threads with a tiny pinch of sugar using a mortar and pestle to create a powder. Pour 2 tablespoons of warm (not boiling) milk or water over the powder and let it sit for at least 15 minutes. The liquid will turn a brilliant crimson gold, ready to be stirred into your biryanis or saffron risottos."
-    ]
-  },
-  {
-    id: 'modern-tofu-tikka',
-    title: 'Modern Tofu: Indian-Spice Infusions',
-    excerpt: 'Tofu is a blank canvas. Discover the chef techniques for pressing and infusing tikka masala marinades deep into soy curds.',
-    category: 'Fusion',
-    author: 'Chef Vikram',
-    readTime: '6 min read',
-    image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600",
-    content: [
-      "For vegetarian cooks, tofu is an amazing protein alternative, but it often gets criticized for being bland. In modern Indian cooking, we treat tofu exactly like paneer—infusing it with robust tikka spices to create a gorgeous fusion experience.",
-      "Step 1: Pressing. Tofu comes packed in water. To get flavor in, you must get the water out. Wrap your firm tofu block in a clean kitchen towel, place a heavy pan on top, and let it drain for 20 minutes. This creates a porous sponge ready to absorb marinade.",
-      "Step 2: The Tikka Marinade. Whisk Greek yogurt, ginger-garlic paste, turmeric, Kashmiri red chili powder, garam masala, mustard oil, and a squeeze of lime. Toss your pressed tofu cubes in this mixture and let them sit for 1 hour. Grill or pan-sear until charred on the edges for a smoky, high-protein culinary bite."
-    ]
-  }
-];
+import { RotateCw, AlertTriangle, Clock } from 'lucide-react';
 
 export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavoritesView }) => {
   const [history, setHistory] = useState([]);
@@ -54,12 +8,6 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'yesterday' | 'breakfast' | 'indian' | 'quick' | 'desserts'
   
-  // Community navigation tab state: 'archive' | 'blog'
-  const [communityTab, setCommunityTab] = useState('archive');
-  
-  // Selected Blog Article for detail modal
-  const [selectedBlog, setSelectedBlog] = useState(null);
-
   // Local storage favorites state
   const [favorites, setFavorites] = useState(() => {
     try {
@@ -207,57 +155,6 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
     setActiveFilter('all');
   };
 
-  // Detailed Blog View Render Modal/Drawer
-  if (selectedBlog) {
-    return (
-      <div className="max-w-[800px] mx-auto px-container-padding py-12 animate-scale-in">
-        <button 
-          onClick={() => setSelectedBlog(null)}
-          className="flex items-center gap-2 text-primary hover:text-primary-container mb-8 font-bold border-none bg-transparent cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Blog list</span>
-        </button>
-
-        <article className="glass-card rounded-[32px] overflow-hidden border border-white/30 shadow-xl">
-          <div className="h-64 md:h-96 relative overflow-hidden">
-            <img 
-              src={selectedBlog.image} 
-              alt={selectedBlog.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div className="absolute bottom-6 left-6 text-white">
-              <span className="bg-primary/95 text-white font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider mb-3 inline-block">
-                {selectedBlog.category}
-              </span>
-              <h1 className="text-xl md:text-3xl font-black text-white">{selectedBlog.title}</h1>
-            </div>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-4 text-xs text-on-surface-variant font-medium">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                <span>By {selectedBlog.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" />
-                <span>{selectedBlog.readTime}</span>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-sm text-on-surface-variant leading-relaxed">
-              {selectedBlog.content.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
-          </div>
-        </article>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-[1440px] mx-auto px-container-padding py-12">
       
@@ -266,15 +163,15 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <span className="inline-block px-3 py-1 bg-tertiary-container/10 text-tertiary font-label-md rounded-full mb-3 text-xs font-bold uppercase tracking-wider">
-              Community Space
+              {showOnlyFavorites ? 'Personal Favorites' : 'Kitchen Archive'}
             </span>
             <h2 className="font-display text-3xl font-black text-on-surface mb-2">
-              {showOnlyFavorites ? 'Saved Recipes' : 'Community'}
+              {showOnlyFavorites ? 'Saved Recipes' : 'Recipe History'}
             </h2>
             <p className="text-sm text-on-surface-variant max-w-xl font-medium opacity-80">
               {showOnlyFavorites 
                 ? 'Your handpicked selections and highest-rated AI creations.' 
-                : 'Explore your past creations, culinary blogs, and shared culinary wisdom.'
+                : 'Explore your past creations, rediscovered favorites, and AI-enhanced culinary experiments.'
               }
             </p>
           </div>
@@ -305,34 +202,8 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
           </div>
         </div>
 
-        {/* Dual Tab navigation selector: Recipe Archive vs Culinary Blog */}
+        {/* Chips/Categories matching Stitch mockup (hidden when showing only favorites) */}
         {!showOnlyFavorites && (
-          <div className="flex border-b border-outline-variant/35 mt-10 gap-8">
-            <button 
-              onClick={() => setCommunityTab('archive')}
-              className={`pb-4 font-black text-xs uppercase tracking-wider transition-all border-none bg-transparent cursor-pointer ${
-                communityTab === 'archive' 
-                  ? 'text-primary border-b-4 border-primary' 
-                  : 'text-on-surface-variant hover:text-primary opacity-60'
-              }`}
-            >
-              Recipe Archive
-            </button>
-            <button 
-              onClick={() => setCommunityTab('blog')}
-              className={`pb-4 font-black text-xs uppercase tracking-wider transition-all border-none bg-transparent cursor-pointer ${
-                communityTab === 'blog' 
-                  ? 'text-primary border-b-4 border-primary' 
-                  : 'text-on-surface-variant hover:text-primary opacity-60'
-              }`}
-            >
-              Culinary Blog
-            </button>
-          </div>
-        )}
-
-        {/* Chips/Categories matching Stitch mockup (hidden when showing only favorites OR showing blog) */}
-        {!showOnlyFavorites && communityTab === 'archive' && (
           <div className="flex gap-3 mt-8 overflow-x-auto pb-2 no-scrollbar">
             <button 
               onClick={() => setActiveFilter('all')}
@@ -399,198 +270,157 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
       </section>
 
       {/* Grid displays */}
-      {communityTab === 'archive' || showOnlyFavorites ? (
-        loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-on-surface-variant">
-            <RotateCw className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-xs font-bold">Querying MongoDB Atlas...</p>
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-on-surface-variant">
+          <RotateCw className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-xs font-bold">Querying MongoDB Atlas...</p>
+        </div>
+      ) : error ? (
+        <div className="bg-error-container border border-error/20 rounded-[32px] p-8 flex items-start gap-4 max-w-2xl mx-auto shadow-md">
+          <AlertTriangle className="w-6 h-6 text-error shrink-0" />
+          <div>
+            <h3 className="font-bold text-on-error-container text-sm">Failed to Load History</h3>
+            <p className="text-xs text-on-error-container mt-1">{error}</p>
           </div>
-        ) : error ? (
-          <div className="bg-error-container border border-error/20 rounded-[32px] p-8 flex items-start gap-4 max-w-2xl mx-auto shadow-md">
-            <AlertTriangle className="w-6 h-6 text-error shrink-0" />
-            <div>
-              <h3 className="font-bold text-on-error-container text-sm">Failed to Load History</h3>
-              <p className="text-xs text-on-error-container mt-1">{error}</p>
-            </div>
-          </div>
-        ) : filteredHistory.length === 0 ? (
-          <div className="text-center py-20 glass-panel rounded-[32px] max-w-xl mx-auto border border-white/20 p-8 shadow-sm">
-            <span className="material-symbols-outlined text-4xl text-primary mb-3">favorite</span>
-            <p className="text-sm font-bold text-on-surface">
-              {showOnlyFavorites ? 'No saved recipes found.' : 'No recipes found matching this filter.'}
-            </p>
-            <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-              {showOnlyFavorites 
-                ? 'Click the heart icon on any recipe card in your history archive to save it here.' 
-                : 'Specify ingredients in the Kitchen workspace and cook to generate your first recipe card.'
-              }
-            </p>
-          </div>
-        ) : (
-          /* Bento grid list */
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredHistory.map((item, index) => {
-              const isFeatured = index === 0 && activeFilter === 'all' && !showOnlyFavorites;
-              const isFav = favorites.includes(item._id);
+        </div>
+      ) : filteredHistory.length === 0 ? (
+        <div className="text-center py-20 glass-panel rounded-[32px] max-w-xl mx-auto border border-white/20 p-8 shadow-sm">
+          <span className="material-symbols-outlined text-4xl text-primary mb-3">favorite</span>
+          <p className="text-sm font-bold text-on-surface">
+            {showOnlyFavorites ? 'No saved recipes found.' : 'No recipes found matching this filter.'}
+          </p>
+          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+            {showOnlyFavorites 
+              ? 'Click the heart icon on any recipe card in your history archive to save it here.' 
+              : 'Specify ingredients in the Kitchen workspace and cook to generate your first recipe card.'
+            }
+          </p>
+        </div>
+      ) : (
+        /* Bento grid list */
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {filteredHistory.map((item, index) => {
+            const isFeatured = index === 0 && activeFilter === 'all' && !showOnlyFavorites;
+            const isFav = favorites.includes(item._id);
 
-              if (isFeatured) {
-                return (
-                  <div 
-                    key={item._id}
-                    onClick={() => onSelectRecipe(item._id)}
-                    className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative animate-scale-in"
-                  >
-                    <div className="recipe-image-container h-[400px] relative overflow-hidden rounded-2xl">
-                      <img 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                        alt={item.title} 
-                        src={getRecipeImage(item.title, item._id)}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 z-10">
-                        <button className="bg-white/90 backdrop-blur-md text-primary font-bold px-6 py-3 rounded-xl shadow-xl flex items-center gap-2 border-none cursor-pointer">
-                          <span className="material-symbols-outlined text-sm">menu_book</span>
-                          <span>View Full Recipe</span>
-                        </button>
-                      </div>
-                      {/* Absolute Heart button for favoriting */}
-                      <button 
-                        onClick={(e) => toggleFavorite(e, item._id)}
-                        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
-                          favorite
-                        </span>
-                      </button>
-                      {/* Absolute Trash button for deleting */}
-                      <button 
-                        onClick={(e) => handleDeleteClick(e, item._id)}
-                        className="absolute top-4 right-16 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          delete
-                        </span>
-                      </button>
-                    </div>
-                    <div className="px-2">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-headline-md text-lg font-black text-on-surface group-hover:text-primary transition-colors">
-                          {item.title}
-                        </h3>
-                        <span className="text-xs font-bold text-on-surface-variant bg-surface-container rounded-full px-3 py-1 italic">
-                          {item.cookTime || '45 mins'}
-                        </span>
-                      </div>
-                      <div className="flex gap-2 mb-3">
-                        <span className="px-3 py-1 bg-primary/5 text-primary text-[12px] font-bold rounded-full uppercase tracking-wider">
-                          Premium AI
-                        </span>
-                        <span className="px-3 py-1 bg-secondary-container/30 text-secondary text-[12px] font-bold rounded-full uppercase tracking-wider">
-                          Fusion
-                        </span>
-                      </div>
-                      <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed opacity-85">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              }
-
+            if (isFeatured) {
               return (
                 <div 
                   key={item._id}
                   onClick={() => onSelectRecipe(item._id)}
-                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative animate-scale-in"
+                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative animate-scale-in"
                 >
-                  <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">
+                  <div className="recipe-image-container h-[400px] relative overflow-hidden rounded-2xl">
                     <img 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                       alt={item.title} 
                       src={getRecipeImage(item.title, item._id)}
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 z-10">
+                      <button className="bg-white/90 backdrop-blur-md text-primary font-bold px-6 py-3 rounded-xl shadow-xl flex items-center gap-2 border-none cursor-pointer">
+                        <span className="material-symbols-outlined text-sm">menu_book</span>
+                        <span>View Full Recipe</span>
+                      </button>
+                    </div>
                     {/* Absolute Heart button for favoriting */}
                     <button 
                       onClick={(e) => toggleFavorite(e, item._id)}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
+                      className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
                     >
-                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
+                      <span className="material-symbols-outlined" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
                         favorite
                       </span>
                     </button>
                     {/* Absolute Trash button for deleting */}
                     <button 
                       onClick={(e) => handleDeleteClick(e, item._id)}
-                      className="absolute top-3 right-13 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
+                      className="absolute top-4 right-16 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
                     >
-                      <span className="material-symbols-outlined text-[18px]">
+                      <span className="material-symbols-outlined text-[20px]">
                         delete
                       </span>
                     </button>
                   </div>
-                  <div>
-                    <h3 className="font-headline-sm font-bold text-sm text-on-surface mb-1 truncate group-hover:text-primary transition-colors">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-on-surface-variant opacity-75 mb-3">
-                      <Clock className="w-3.5 h-3.5 text-primary" />
-                      <span>{item.cookTime || '20 mins'}</span>
-                      <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
-                      <span className="capitalize">{item.difficulty || 'Easy'}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant text-[10px] font-bold rounded-md uppercase">
-                        Recipe Card
+                  <div className="px-2">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-headline-md text-lg font-black text-on-surface group-hover:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <span className="text-xs font-bold text-on-surface-variant bg-surface-container rounded-full px-3 py-1 italic">
+                        {item.cookTime || '45 mins'}
                       </span>
                     </div>
+                    <div className="flex gap-2 mb-3">
+                      <span className="px-3 py-1 bg-primary/5 text-primary text-[12px] font-bold rounded-full uppercase tracking-wider">
+                        Premium AI
+                      </span>
+                      <span className="px-3 py-1 bg-secondary-container/30 text-secondary text-[12px] font-bold rounded-full uppercase tracking-wider">
+                        Fusion
+                      </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed opacity-85">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               );
-            })}
-          </section>
-        )
-      ) : (
-        /* Blog grid display list */
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {BLOG_POSTS.map((post) => (
-            <div 
-              key={post.id}
-              onClick={() => setSelectedBlog(post)}
-              className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent animate-scale-in"
-            >
-              <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">
-                <img 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                  alt={post.title} 
-                  src={post.image}
-                />
-                <span className="absolute top-3 left-3 bg-primary text-white font-bold px-3 py-1 rounded-lg text-[10px] uppercase tracking-wider">
-                  {post.category}
-                </span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 text-[10px] text-on-surface-variant opacity-60 mb-2 font-bold">
-                  <span>{post.author}</span>
-                  <span className="w-1 h-1 bg-outline-variant rounded-full"></span>
-                  <span>{post.readTime}</span>
+            }
+
+            return (
+              <div 
+                key={item._id}
+                onClick={() => onSelectRecipe(item._id)}
+                className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative animate-scale-in"
+              >
+                <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">
+                  <img 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    alt={item.title} 
+                    src={getRecipeImage(item.title, item._id)}
+                  />
+                  {/* Absolute Heart button for favoriting */}
+                  <button 
+                    onClick={(e) => toggleFavorite(e, item._id)}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
+                      favorite
+                    </span>
+                  </button>
+                  {/* Absolute Trash button for deleting */}
+                  <button 
+                    onClick={(e) => handleDeleteClick(e, item._id)}
+                    className="absolute top-3 right-13 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      delete
+                    </span>
+                  </button>
                 </div>
-                <h3 className="font-headline-sm font-bold text-sm text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                  {post.title}
-                </h3>
-                <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed opacity-80">
-                  {post.excerpt}
-                </p>
-                <div className="mt-4 flex items-center gap-1.5 text-primary text-xs font-black uppercase tracking-wider group-hover:translate-x-1 transition-transform">
-                  <span>Read Article</span>
-                  <BookOpen className="w-4 h-4" />
+                <div>
+                  <h3 className="font-headline-sm font-bold text-sm text-on-surface mb-1 truncate group-hover:text-primary transition-colors">
+                    {item.title}
+                  </h3>
+                  <div className="flex items-center gap-2 text-xs text-on-surface-variant opacity-75 mb-3">
+                    <Clock className="w-3.5 h-3.5 text-primary" />
+                    <span>{item.cookTime || '20 mins'}</span>
+                    <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+                    <span className="capitalize">{item.difficulty || 'Easy'}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    <span className="px-2 py-0.5 bg-surface-container text-on-surface-variant text-[10px] font-bold rounded-md uppercase">
+                      Recipe Card
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       )}
 
       {/* Explore More Section */}
-      {communityTab === 'archive' && !loading && !error && filteredHistory.length > 0 && (
+      {!loading && !error && filteredHistory.length > 0 && (
         <div className="mt-20 flex flex-col items-center gap-4">
           <button 
             onClick={fetchHistory}
