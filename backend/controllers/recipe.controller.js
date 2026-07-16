@@ -57,7 +57,7 @@ export const getRecipeHistory = async (req, res, next) => {
   try {
     // Select summary fields to keep list response payload minimal
     // Filter: if user is logged in, show only their recipes. Otherwise, show anonymous/guest ones.
-    const query = req.user ? { user: req.user._id } : { user: { $exists: false } };
+    const query = req.user ? { user: req.user._id } : { $or: [{ user: { $exists: false } }, { user: null }] };
 
     const recipes = await Recipe.find(query, 'title description difficulty createdAt inputIngredients')
       .sort({ createdAt: -1 })
