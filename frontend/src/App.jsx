@@ -449,21 +449,6 @@ function App() {
 
                 </div>
               </section>
-
-              {/* Landing Page Footer */}
-              <footer className="w-full py-12 px-container-padding bg-surface-container-lowest border-t border-outline-variant/30 mt-20">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-gutter max-w-[1440px] mx-auto">
-                  <div className="flex flex-col gap-2 text-center md:text-left">
-                    <span className="font-headline-md text-primary font-bold">TadkaMode AI</span>
-                    <p className="font-body-md text-body-md text-on-surface-variant">© 2026 TadkaMode AI. Premium Culinary Precision.</p>
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-8">
-                    <a className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md hover:underline" href="#">Privacy Policy</a>
-                    <a className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md hover:underline" href="#">Terms of Service</a>
-                    <a className="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md hover:underline" href="#">Contact Support</a>
-                  </div>
-                </div>
-              </footer>
             </div>
           )}
 
