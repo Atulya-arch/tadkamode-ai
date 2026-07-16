@@ -7,8 +7,7 @@ import { ShaderBackground } from './components/ShaderBackground';
 import { HistoryView } from './components/HistoryView';
 import { PantryView } from './components/PantryView';
 import { CommunityView } from './components/CommunityView';
-import { AuthModal } from './components/AuthModal';
-import { authService } from './services/authService';
+
 import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
@@ -17,19 +16,10 @@ function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen' | 'history'
   const [onlyFavoritesView, setOnlyFavoritesView] = useState(false);
-  const [user, setUser] = useState(null);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const currentUser = await authService.getMe();
-      if (currentUser) {
-        setUser(currentUser);
-      }
-    };
-    checkSession();
-  }, []);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -316,45 +306,7 @@ function App() {
                 <span>Create Recipe</span>
               </button>
               
-              {/* Dynamic User Profile / Login Auth Controls */}
-              {user ? (
-                <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30 relative group">
-                  <span className="hidden sm:inline font-label-md font-semibold text-xs text-on-surface">{user.name}</span>
-                  <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden cursor-pointer shadow-sm flex items-center justify-center bg-primary text-white font-bold text-sm uppercase">
-                    {user.name.charAt(0)}
-                  </div>
-                  {/* Logout dropdown */}
-                  <div className="absolute right-0 top-full mt-2 w-36 bg-surface-container-high border border-outline-variant/35 rounded-2xl shadow-xl p-2 hidden group-hover:block hover:block z-50">
-                    <button 
-                      onClick={() => {
-                        authService.logout();
-                        setUser(null);
-                        clear();
-                        setCurrentView('landing');
-                      }}
-                      className="w-full text-left p-2.5 hover:bg-error-container hover:text-on-error-container text-xs font-bold rounded-xl border-none bg-transparent cursor-pointer flex items-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">logout</span>
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30">
-                  <button 
-                    onClick={() => setAuthModalOpen(true)}
-                    className="px-4 py-2 border border-outline rounded-full text-xs font-bold text-on-surface hover:bg-surface-container-high transition-colors bg-transparent cursor-pointer"
-                  >
-                    Login
-                  </button>
-                  <button 
-                    onClick={() => setAuthModalOpen(true)}
-                    className="px-4 py-2 bg-primary text-white rounded-full text-xs font-black shadow-md hover:scale-105 transition-all border-none cursor-pointer"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              )}
+
             </div>
           </header>
 
@@ -855,22 +807,7 @@ function App() {
           <span className={`material-symbols-outlined ${currentView === 'history' && onlyFavoritesView ? 'active-icon' : ''}`}>favorite</span>
           <span className="text-[10px] uppercase tracking-tight">Saved</span>
         </button>
-        <button 
-          onClick={handleReset}
-          className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer text-on-surface-variant"
-        >
-          <span className="material-symbols-outlined">person</span>
-          <span className="text-[10px] uppercase tracking-tight">Profile</span>
-        </button>
       </nav>
-      <AuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
-        onAuthSuccess={(userData) => {
-          setUser(userData);
-          clear();
-        }}
-      />
     </div>
   );
 }

@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import recipeRouter from './routes/recipe.routes.js';
-import authRouter from './routes/auth.routes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -16,14 +15,12 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // 1. Establish Database Connection (MongoDB)
-// In local development, we allow the server to run even if MongoDB isn't running yet (though connection logs will show errors),
-// but in production, we typically want DB connectivity established.
 connectDB();
 
 // 2. Global Middlewares
 app.use(helmet()); // Security headers
 app.use(cors({
-  origin: '*', // We can restrict this to specific origins (e.g. localhost:5173) in production
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -41,7 +38,6 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // 3. API Routes
 app.use('/api/recipes', recipeRouter);
-app.use('/api/auth', authRouter);
 
 // Health Check Endpoint
 app.use('/health', (req, res) => {
@@ -83,7 +79,7 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Programming/unknown errors: don't leak leak details to client
+  // Programming/unknown errors: don't leak details to client
   return res.status(500).json({
     status: 'error',
     message: 'Something went wrong on our end. Please try again later.'
