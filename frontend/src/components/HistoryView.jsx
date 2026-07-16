@@ -287,12 +287,12 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredHistory.map((item, index) => {
             const isFeatured = index === 0 && activeFilter === 'all' && !showOnlyFavorites;
-            const isFav = favorites.includes(item._id);
+            const isFav = favorites.includes(item.id);
 
             if (isFeatured) {
               return (
                 <div 
-                  key={item._id}
+                  key={item.id}
                   onClick={() => onSelectRecipe(item)}
                   className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative animate-scale-in"
                 >
@@ -300,7 +300,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                     <img 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                       alt={item.title} 
-                      src={getRecipeImage(item.title, item._id)}
+                      src={getRecipeImage(item.title, item.id)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 z-10">
                       <button className="bg-white/90 backdrop-blur-md text-primary font-bold px-6 py-3 rounded-xl shadow-xl flex items-center gap-2 border-none cursor-pointer">
@@ -310,7 +310,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                     </div>
                     {/* Absolute Heart button for favoriting */}
                     <button 
-                      onClick={(e) => toggleFavorite(e, item._id)}
+                      onClick={(e) => toggleFavorite(e, item.id)}
                       className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
                     >
                       <span className="material-symbols-outlined" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
@@ -319,7 +319,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                     </button>
                     {/* Absolute Trash button for deleting */}
                     <button 
-                      onClick={(e) => handleDeleteClick(e, item._id)}
+                      onClick={(e) => handleDeleteClick(e, item.id)}
                       className="absolute top-4 right-16 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
                     >
                       <span className="material-symbols-outlined text-[20px]">
@@ -354,7 +354,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
 
             return (
               <div 
-                key={item._id}
+                key={item.id}
                 onClick={() => onSelectRecipe(item)}
                 className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative animate-scale-in"
               >
@@ -362,11 +362,11 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                   <img 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     alt={item.title} 
-                    src={getRecipeImage(item.title, item._id)}
+                    src={getRecipeImage(item.title, item.id)}
                   />
                   {/* Absolute Heart button for favoriting */}
                   <button 
-                    onClick={(e) => toggleFavorite(e, item._id)}
+                    onClick={(e) => toggleFavorite(e, item.id)}
                     className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
                   >
                     <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
@@ -375,7 +375,7 @@ export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavorit
                   </button>
                   {/* Absolute Trash button for deleting */}
                   <button 
-                    onClick={(e) => handleDeleteClick(e, item._id)}
+                    onClick={(e) => handleDeleteClick(e, item.id)}
                     className="absolute top-3 right-13 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-error shadow-sm border-none cursor-pointer z-20 hover:scale-115 active:scale-90 transition-transform hover:bg-error-container hover:text-on-error-container"
                   >
                     <span className="material-symbols-outlined text-[18px]">

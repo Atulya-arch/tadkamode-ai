@@ -40,7 +40,7 @@ function App() {
     grains: ['Basmati Rice', 'Quinoa', 'Penne Pasta', 'Flour']
   };
 
-  const handleGenerate = (e, useMock = false) => {
+  const handleGenerate = (e) => {
     e?.preventDefault();
     const parsed = inputText
       .split(',')
@@ -50,8 +50,7 @@ function App() {
     if (parsed.length === 0 && ingredients.length === 0) return;
     const combined = [...new Set([...ingredients, ...parsed])];
     
-    // Switch to active cooking detail state
-    generate(combined, useMock);
+    generate(combined);
   };
 
   const handlePresetToggle = (presetName) => {
