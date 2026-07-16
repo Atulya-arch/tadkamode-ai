@@ -12,6 +12,7 @@ function App() {
   const [ingredients, setIngredients] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen' | 'history'
+  const [onlyFavoritesView, setOnlyFavoritesView] = useState(false);
   const [customInputOpen, setCustomInputOpen] = useState(false);
   const [newCustomTag, setNewCustomTag] = useState('');
   const { recipe, status, error, generate, loadRecipeFromHistory, retry, clear, isLoading } = useRecipeGenerator();
@@ -146,9 +147,9 @@ function App() {
               </button>
 
               <button 
-                onClick={() => { clear(); setCurrentView('history'); }}
+                onClick={() => { clear(); setOnlyFavoritesView(false); setCurrentView('history'); }}
                 className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
-                  currentView === 'history' 
+                  currentView === 'history' && !onlyFavoritesView
                     ? 'bg-primary-container text-white shadow-inner font-bold' 
                     : 'text-on-surface-variant hover:bg-surface-container-high'
                 }`}
@@ -158,8 +159,12 @@ function App() {
               </button>
 
               <button 
-                onClick={() => setIsDrawerOpen(true)}
-                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
+                onClick={() => { clear(); setOnlyFavoritesView(true); setCurrentView('history'); }}
+                className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
+                  currentView === 'history' && onlyFavoritesView
+                    ? 'bg-primary-container text-white shadow-inner font-bold' 
+                    : 'text-on-surface-variant hover:bg-surface-container-high'
+                }`}
               >
                 <span className="material-symbols-outlined">favorite</span>
                 <span className="font-label-md text-xs">Favorites</span>
@@ -229,9 +234,9 @@ function App() {
                   Kitchen
                 </button>
                 <button 
-                  onClick={() => { clear(); setCurrentView('history'); }}
+                  onClick={() => { clear(); setOnlyFavoritesView(false); setCurrentView('history'); }}
                   className={`font-label-md text-xs transition-colors border-none bg-transparent cursor-pointer ${
-                    currentView === 'history' 
+                    currentView === 'history' && !onlyFavoritesView
                       ? 'text-primary font-bold border-b-2 border-primary pb-1' 
                       : 'text-on-surface-variant hover:text-primary'
                   }`}
@@ -686,7 +691,11 @@ function App() {
           {currentView === 'history' && (
             /* PAGE 4: FULL ARCHIVE HISTORY BENTO VIEW */
             <div className="flex-1 overflow-y-auto">
-              <HistoryView onSelectRecipe={handleHistorySelection} />
+              <HistoryView 
+                onSelectRecipe={handleHistorySelection} 
+                showOnlyFavorites={onlyFavoritesView}
+                onToggleFavoritesView={setOnlyFavoritesView}
+              />
             </div>
           )}
 
@@ -728,12 +737,12 @@ function App() {
           <span className="text-[10px] uppercase tracking-tight">Pantry</span>
         </button>
         <button 
-          onClick={() => { clear(); setCurrentView('history'); }}
+          onClick={() => { clear(); setOnlyFavoritesView(true); setCurrentView('history'); }}
           className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer ${
-            currentView === 'history' ? 'text-primary' : 'text-on-surface-variant'
+            currentView === 'history' && onlyFavoritesView ? 'text-primary font-bold' : 'text-on-surface-variant'
           }`}
         >
-          <span className={`material-symbols-outlined ${currentView === 'history' ? 'active-icon' : ''}`}>favorite</span>
+          <span className={`material-symbols-outlined ${currentView === 'history' && onlyFavoritesView ? 'active-icon' : ''}`}>favorite</span>
           <span className="text-[10px] uppercase tracking-tight">Saved</span>
         </button>
         <button 

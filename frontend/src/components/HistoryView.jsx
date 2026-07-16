@@ -2,11 +2,21 @@ import React, { useState, useEffect, useRef } from 'react';
 import { recipeService } from '../services/recipeService';
 import { RotateCw, AlertTriangle, Clock } from 'lucide-react';
 
-export const HistoryView = ({ onSelectRecipe }) => {
+export const HistoryView = ({ onSelectRecipe, showOnlyFavorites, onToggleFavoritesView }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'yesterday' | 'breakfast' | 'indian' | 'quick' | 'desserts'
+  
+  // Local storage favorites state
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('tadka_favorites') || '[]');
+    } catch (e) {
+      return [];
+    }
+  });
+
   const activeControllerRef = useRef(null);
 
   useEffect(() => {
@@ -38,12 +48,21 @@ export const HistoryView = ({ onSelectRecipe }) => {
     }
   };
 
+  const toggleFavorite = (e, recipeId) => {
+    e.stopPropagation(); // Prevent clicking favorite button from opening recipe details
+    setFavorites(prev => {
+      const next = prev.includes(recipeId) ? prev.filter(id => id !== recipeId) : [...prev, recipeId];
+      localStorage.setItem('tadka_favorites', JSON.stringify(next));
+      return next;
+    });
+  };
+
   // Assign beautiful Unsplash editorial culinary images based on ingredients
   const getRecipeImage = (title = '', index = 0) => {
     const t = title.toLowerCase();
     
     // Default featured image (Risotto)
-    if (index === 0 && activeFilter === 'all') {
+    if (index === 0 && activeFilter === 'all' && !showOnlyFavorites) {
       return "https://lh3.googleusercontent.com/aida-public/AB6AXuBG8N4HU4PpqtUvNb-_v9rPoW5DoYMmq46mQtf5Os3jVj7D3pXJI-AgVy04HvF6Hxm0xcpROA4bfzjcec0Ycu7FsMEOt0N5I801CSy7NaPA1rxz0atBK9gUCgVyoOqgy0xYuejfGmR-DpGOd9-f8xzEGmTjyOq8QsjSmyKVofFGAptYD5oCbfRokP7cDB72LyZcwnftZFAyofjo3oJgiT1XTpv2VGTbGgeKd45Y6s8lW_aq_0DFdS-nSQ";
     }
 
@@ -73,11 +92,15 @@ export const HistoryView = ({ onSelectRecipe }) => {
 
   // Client-side filtration logic matching Stitch categories
   const filteredHistory = history.filter(item => {
+    // If favorites mode is activated via sidebar
+    if (showOnlyFavorites) {
+      return favorites.includes(item._id);
+    }
+
     const t = item.title?.toLowerCase() || '';
     const ingredientsText = (item.inputIngredients || []).join(' ').toLowerCase();
 
     if (activeFilter === 'yesterday') {
-      // Return older entries or mock subset
       return (item.difficulty || '').toLowerCase() === 'easy';
     }
     if (activeFilter === 'breakfast') {
@@ -96,6 +119,13 @@ export const HistoryView = ({ onSelectRecipe }) => {
     return true;
   });
 
+  const handleClearFavoritesFilter = () => {
+    if (onToggleFavoritesView) {
+      onToggleFavoritesView(false);
+    }
+    setActiveFilter('all');
+  };
+
   return (
     <div className="max-w-[1440px] mx-auto px-container-padding py-12">
       
@@ -104,15 +134,28 @@ export const HistoryView = ({ onSelectRecipe }) => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <span className="inline-block px-3 py-1 bg-tertiary-container/10 text-tertiary font-label-md rounded-full mb-3 text-xs font-bold uppercase tracking-wider">
-              Kitchen Archive
+              {showOnlyFavorites ? 'Personal Favorites' : 'Kitchen Archive'}
             </span>
-            <h2 className="font-display text-3xl font-black text-on-surface mb-2">Recipe History</h2>
+            <h2 className="font-display text-3xl font-black text-on-surface mb-2">
+              {showOnlyFavorites ? 'Saved Recipes' : 'Recipe History'}
+            </h2>
             <p className="text-sm text-on-surface-variant max-w-xl font-medium opacity-80">
-              Explore your past creations, rediscovered favorites, and AI-enhanced culinary experiments.
+              {showOnlyFavorites 
+                ? 'Your handpicked selections and highest-rated AI creations.' 
+                : 'Explore your past creations, rediscovered favorites, and AI-enhanced culinary experiments.'
+              }
             </p>
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
+            {showOnlyFavorites && (
+              <button 
+                onClick={handleClearFavoritesFilter}
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full text-xs font-bold border-none cursor-pointer shadow-md"
+              >
+                <span>Show All History</span>
+              </button>
+            )}
             <button 
               onClick={fetchHistory}
               className="flex items-center gap-2 px-5 py-2.5 glass-card rounded-full text-on-surface hover:text-primary active:scale-95 border-none cursor-pointer text-xs font-bold bg-transparent"
@@ -130,69 +173,71 @@ export const HistoryView = ({ onSelectRecipe }) => {
           </div>
         </div>
 
-        {/* Chips/Categories matching Stitch mockup */}
-        <div className="flex gap-3 mt-8 overflow-x-auto pb-2 no-scrollbar">
-          <button 
-            onClick={() => setActiveFilter('all')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'all' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            All Recipes
-          </button>
-          <button 
-            onClick={() => setActiveFilter('yesterday')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'yesterday' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            Generated Yesterday
-          </button>
-          <button 
-            onClick={() => setActiveFilter('breakfast')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'breakfast' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            Breakfast Classics
-          </button>
-          <button 
-            onClick={() => setActiveFilter('indian')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'indian' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            Spicy Indian
-          </button>
-          <button 
-            onClick={() => setActiveFilter('quick')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'quick' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            Quick Bites
-          </button>
-          <button 
-            onClick={() => setActiveFilter('desserts')}
-            className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
-              activeFilter === 'desserts' 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
-            }`}
-          >
-            Desserts
-          </button>
-        </div>
+        {/* Chips/Categories matching Stitch mockup (hidden when showing only favorites) */}
+        {!showOnlyFavorites && (
+          <div className="flex gap-3 mt-8 overflow-x-auto pb-2 no-scrollbar">
+            <button 
+              onClick={() => setActiveFilter('all')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'all' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              All Recipes
+            </button>
+            <button 
+              onClick={() => setActiveFilter('yesterday')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'yesterday' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              Generated Yesterday
+            </button>
+            <button 
+              onClick={() => setActiveFilter('breakfast')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'breakfast' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              Breakfast Classics
+            </button>
+            <button 
+              onClick={() => setActiveFilter('indian')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'indian' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              Spicy Indian
+            </button>
+            <button 
+              onClick={() => setActiveFilter('quick')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'quick' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              Quick Bites
+            </button>
+            <button 
+              onClick={() => setActiveFilter('desserts')}
+              className={`px-6 py-2 rounded-full text-xs font-bold transition-all border-none cursor-pointer whitespace-nowrap ${
+                activeFilter === 'desserts' 
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                  : 'glass-card text-on-surface-variant hover:text-primary bg-transparent'
+              }`}
+            >
+              Desserts
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Grid displays */}
@@ -211,24 +256,30 @@ export const HistoryView = ({ onSelectRecipe }) => {
         </div>
       ) : filteredHistory.length === 0 ? (
         <div className="text-center py-20 glass-panel rounded-[32px] max-w-xl mx-auto border border-white/20 p-8 shadow-sm">
-          <span className="material-symbols-outlined text-4xl text-primary mb-3">kitchen</span>
-          <p className="text-sm font-bold text-on-surface">No recipes found matching this filter.</p>
+          <span className="material-symbols-outlined text-4xl text-primary mb-3">favorite</span>
+          <p className="text-sm font-bold text-on-surface">
+            {showOnlyFavorites ? 'No saved recipes found.' : 'No recipes found matching this filter.'}
+          </p>
           <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-            Specify ingredients in the Kitchen workspace and cook to generate your first recipe card.
+            {showOnlyFavorites 
+              ? 'Click the heart icon on any recipe card in your history archive to save it here.' 
+              : 'Specify ingredients in the Kitchen workspace and cook to generate your first recipe card.'
+            }
           </p>
         </div>
       ) : (
         /* Bento grid list */
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredHistory.map((item, index) => {
-            const isFeatured = index === 0 && activeFilter === 'all';
-            
+            const isFeatured = index === 0 && activeFilter === 'all' && !showOnlyFavorites;
+            const isFav = favorites.includes(item._id);
+
             if (isFeatured) {
               return (
                 <div 
                   key={item._id}
                   onClick={() => onSelectRecipe(item._id)}
-                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group"
+                  className="glass-card rounded-[24px] p-4 flex flex-col gap-4 lg:col-span-2 lg:row-span-2 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group relative"
                 >
                   <div className="recipe-image-container h-[400px] relative overflow-hidden rounded-2xl">
                     <img 
@@ -242,6 +293,15 @@ export const HistoryView = ({ onSelectRecipe }) => {
                         <span>View Full Recipe</span>
                       </button>
                     </div>
+                    {/* Absolute Heart button for favoriting */}
+                    <button 
+                      onClick={(e) => toggleFavorite(e, item._id)}
+                      className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
+                        favorite
+                      </span>
+                    </button>
                   </div>
                   <div className="px-2">
                     <div className="flex justify-between items-start mb-2">
@@ -272,14 +332,23 @@ export const HistoryView = ({ onSelectRecipe }) => {
               <div 
                 key={item._id}
                 onClick={() => onSelectRecipe(item._id)}
-                className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent"
+                className="glass-card rounded-[24px] p-4 flex flex-col gap-4 border border-white/35 cursor-pointer shadow-sm hover:shadow-xl group bg-transparent relative"
               >
-                <div className="recipe-image-container h-48 overflow-hidden rounded-2xl">
+                <div className="recipe-image-container h-48 overflow-hidden rounded-2xl relative">
                   <img 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                     alt={item.title} 
                     src={getRecipeImage(item.title, index)}
                   />
+                  {/* Absolute Heart button for favoriting */}
+                  <button 
+                    onClick={(e) => toggleFavorite(e, item._id)}
+                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-primary shadow-sm border-none cursor-pointer z-20 hover:scale-110 active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isFav ? "'FILL' 1" : "'FILL' 0" }}>
+                      favorite
+                    </span>
+                  </button>
                 </div>
                 <div>
                   <h3 className="font-headline-sm font-bold text-sm text-on-surface mb-1 truncate group-hover:text-primary transition-colors">
