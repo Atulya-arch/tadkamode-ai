@@ -716,17 +716,7 @@ function App() {
                 </section>
 
               </div>
-              
-              {/* Footer (Shared) */}
-              <footer className="w-full py-8 mt-12 flex flex-col md:flex-row justify-between items-center gap-4 bg-surface-container-lowest/40 backdrop-blur-md border-t border-outline-variant/10 rounded-2xl p-6">
-                <span className="font-body-md text-on-surface-variant/70 text-center md:text-left text-xs">© 2026 TadkaMode AI. Premium Culinary Precision.</span>
-                <div className="flex gap-8">
-                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Privacy Policy</a>
-                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Terms of Service</a>
-                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Press Kit</a>
-                  <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Contact Support</a>
-                </div>
-              </footer>
+
             </div>
           )}
 
@@ -760,6 +750,18 @@ function App() {
 
         </main>
       </div>
+
+      {/* Global Footer — visible on every page */}
+      <footer className="w-full flex flex-col sm:flex-row justify-between items-center gap-3 px-8 py-5 bg-surface-container-lowest/40 backdrop-blur-md border-t border-outline-variant/10">
+        <span className="font-body-md text-on-surface-variant/70 text-center sm:text-left text-xs">
+          © 2026 TadkaMode AI. Premium Culinary Precision.
+        </span>
+        <div className="flex items-center gap-6">
+          <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Privacy Policy</a>
+          <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Terms of Service</a>
+          <a className="font-body-md text-on-surface-variant hover:text-primary transition-all text-xs" href="#">Contact Support</a>
+        </div>
+      </footer>
 
       {/* Global Slide-out Drawer Panel */}
       <HistoryDrawer
