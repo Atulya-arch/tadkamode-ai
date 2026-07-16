@@ -19,7 +19,7 @@ export const generateRecipe = async (req, res, next) => {
     const { ingredients } = parsedBody.data;
 
     // 2. Call service to generate recipe (saves to DB inside service)
-    const recipe = await recipeService.generateRecipeFromIngredients(ingredients);
+    const recipe = await recipeService.generateRecipeFromIngredients(ingredients, req.user?._id);
 
     // 3. Return JSON response
     return res.status(200).json({
@@ -56,7 +56,10 @@ export const getMockRecipe = async (req, res, next) => {
 export const getRecipeHistory = async (req, res, next) => {
   try {
     // Select summary fields to keep list response payload minimal
-    const recipes = await Recipe.find({}, 'title description difficulty createdAt inputIngredients')
+    // Filter: if user is logged in, show only their recipes. Otherwise, show anonymous/guest ones.
+    const query = req.user ? { user: req.user._id } : { user: { $exists: false } };
+
+    const recipes = await Recipe.find(query, 'title description difficulty createdAt inputIngredients')
       .sort({ createdAt: -1 })
       .limit(30);
 

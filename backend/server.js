@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import recipeRouter from './routes/recipe.routes.js';
+import authRouter from './routes/auth.routes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -40,6 +41,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // 3. API Routes
 app.use('/api/recipes', recipeRouter);
+app.use('/api/auth', authRouter);
 
 // Health Check Endpoint
 app.use('/health', (req, res) => {

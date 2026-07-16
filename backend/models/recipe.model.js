@@ -28,6 +28,7 @@ const recipeSchema = new mongoose.Schema({
   substitutions: [substitutionSchema],
   tips: [{ type: String }],
   inputIngredients: [{ type: String, trim: true }], // The ingredients user entered to get this recipe
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   createdAt: { type: Date, default: Date.now }
 });
 

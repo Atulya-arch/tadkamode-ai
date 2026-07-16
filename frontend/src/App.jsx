@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRecipeGenerator } from './hooks/useRecipeGenerator';
 import { RecipeSkeleton } from './components/RecipeSkeleton';
 import { RecipeView } from './components/RecipeView';
@@ -7,6 +7,8 @@ import { ShaderBackground } from './components/ShaderBackground';
 import { HistoryView } from './components/HistoryView';
 import { PantryView } from './components/PantryView';
 import { CommunityView } from './components/CommunityView';
+import { AuthModal } from './components/AuthModal';
+import { authService } from './services/authService';
 import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
@@ -15,6 +17,18 @@ function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'kitchen' | 'history'
   const [onlyFavoritesView, setOnlyFavoritesView] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const currentUser = await authService.getMe();
+      if (currentUser) {
+        setUser(currentUser);
+      }
+    };
+    checkSession();
+  }, []);
   const [customInputOpen, setCustomInputOpen] = useState(false);
   const [newCustomTag, setNewCustomTag] = useState('');
   const { recipe, status, error, generate, loadRecipeFromHistory, retry, clear, isLoading } = useRecipeGenerator();
@@ -259,17 +273,45 @@ function App() {
                 <span>Create Recipe</span>
               </button>
               
-              {/* User profile with name Alexandra and border-primary-container */}
-              <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30">
-                <span className="hidden sm:inline font-label-md font-semibold text-xs text-on-surface">Alexandra</span>
-                <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden cursor-pointer shadow-sm">
-                  <img 
-                    className="w-full h-full object-cover" 
-                    alt="Alexandra chef profile"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCxr4L6kX_Db8tqV7gLQl0KHXvtk1XkBsHs88diiytMxy8CJICOsqRq2zh3vcAy3-uFraw43y5iwBZvJ_Ef0UuHz3mOWSIeIAteaH3l8ref0Jdud9ncBV_QRVVlk69AQeNiMkVsjlZXixj2TT7lHkW-1LxrpKIyQ_2LEq66MbEq3Mu4uTkGTeEdnjK7LU8KTPEv_a5FypH2JEd0xrKC29JQ7qLF7P_renFZvdM2GBqef654IeSSHsG_w"
-                  />
+              {/* Dynamic User Profile / Login Auth Controls */}
+              {user ? (
+                <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30 relative group">
+                  <span className="hidden sm:inline font-label-md font-semibold text-xs text-on-surface">{user.name}</span>
+                  <div className="w-10 h-10 rounded-full border-2 border-primary-container overflow-hidden cursor-pointer shadow-sm flex items-center justify-center bg-primary text-white font-bold text-sm uppercase">
+                    {user.name.charAt(0)}
+                  </div>
+                  {/* Logout dropdown */}
+                  <div className="absolute right-0 top-full mt-2 w-36 bg-surface-container-high border border-outline-variant/35 rounded-2xl shadow-xl p-2 hidden group-hover:block hover:block z-50">
+                    <button 
+                      onClick={() => {
+                        authService.logout();
+                        setUser(null);
+                        clear();
+                        setCurrentView('landing');
+                      }}
+                      className="w-full text-left p-2.5 hover:bg-error-container hover:text-on-error-container text-xs font-bold rounded-xl border-none bg-transparent cursor-pointer flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">logout</span>
+                      <span>Logout</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center gap-3 pl-6 border-l border-outline-variant/30">
+                  <button 
+                    onClick={() => setAuthModalOpen(true)}
+                    className="px-4 py-2 border border-outline rounded-full text-xs font-bold text-on-surface hover:bg-surface-container-high transition-colors bg-transparent cursor-pointer"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => setAuthModalOpen(true)}
+                    className="px-4 py-2 bg-primary text-white rounded-full text-xs font-black shadow-md hover:scale-105 transition-all border-none cursor-pointer"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              )}
             </div>
           </header>
 
@@ -778,6 +820,14 @@ function App() {
           <span className="text-[10px] uppercase tracking-tight">Profile</span>
         </button>
       </nav>
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        onAuthSuccess={(userData) => {
+          setUser(userData);
+          clear();
+        }}
+      />
     </div>
   );
 }

@@ -1,5 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
+// Helper to resolve JWT headers dynamically if a user is authenticated
+const getHeaders = () => {
+  const token = localStorage.getItem('tadka_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 /**
  * Service to handle communication with backend Recipe API endpoints
  */
@@ -11,9 +20,7 @@ export const recipeService = {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/generate`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         body: JSON.stringify({ ingredients }),
         signal,
       });
@@ -40,9 +47,7 @@ export const recipeService = {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/mock`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         signal,
       });
 
@@ -68,9 +73,7 @@ export const recipeService = {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/history`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         signal,
       });
 
@@ -96,9 +99,7 @@ export const recipeService = {
     try {
       const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getHeaders(),
         signal,
       });
 
@@ -123,9 +124,7 @@ export const recipeService = {
   async deleteRecipe(id) {
     const response = await fetch(`${API_BASE_URL}/recipes/history/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: getHeaders()
     });
 
     const result = await response.json();
@@ -137,3 +136,5 @@ export const recipeService = {
     return result;
   }
 };
+
+export default recipeService;
