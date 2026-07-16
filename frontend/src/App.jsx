@@ -5,6 +5,7 @@ import { RecipeView } from './components/RecipeView';
 import { HistoryDrawer } from './components/HistoryDrawer';
 import { ShaderBackground } from './components/ShaderBackground';
 import { HistoryView } from './components/HistoryView';
+import { PantryView } from './components/PantryView';
 import { X, AlertTriangle, Plus } from 'lucide-react';
 
 function App() {
@@ -139,8 +140,12 @@ function App() {
               </button>
 
               <button 
-                className="flex items-center gap-4 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-300 border-none bg-transparent cursor-pointer text-left w-full"
-                onClick={() => { clear(); setCurrentView('kitchen'); }}
+                onClick={() => { clear(); setCurrentView('pantry'); }}
+                className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 border-none cursor-pointer text-left w-full ${
+                  currentView === 'pantry' 
+                    ? 'bg-primary-container text-white shadow-inner font-bold' 
+                    : 'text-on-surface-variant hover:bg-surface-container-high'
+                }`}
               >
                 <span className="material-symbols-outlined">kitchen</span>
                 <span className="font-label-md text-xs">Pantry</span>
@@ -699,6 +704,16 @@ function App() {
             </div>
           )}
 
+          {currentView === 'pantry' && (
+            /* PAGE 5: DEDICATED SMART PANTRY VIEW */
+            <div className="flex-1 overflow-y-auto">
+              <PantryView 
+                setIngredients={setIngredients}
+                setCurrentView={setCurrentView}
+              />
+            </div>
+          )}
+
         </main>
       </div>
 
@@ -730,10 +745,12 @@ function App() {
           <span className="text-[10px] uppercase tracking-tight">Cook</span>
         </button>
         <button 
-          onClick={() => { clear(); setCurrentView('kitchen'); }}
-          className="flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer text-on-surface-variant"
+          onClick={() => { clear(); setCurrentView('pantry'); }}
+          className={`flex flex-col items-center gap-1 bg-transparent border-none cursor-pointer ${
+            currentView === 'pantry' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined">kitchen</span>
+          <span className={`material-symbols-outlined ${currentView === 'pantry' ? 'active-icon' : ''}`}>kitchen</span>
           <span className="text-[10px] uppercase tracking-tight">Pantry</span>
         </button>
         <button 
