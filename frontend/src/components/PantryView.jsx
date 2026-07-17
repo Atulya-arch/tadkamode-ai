@@ -117,29 +117,7 @@ export const PantryView = ({ setIngredients, setCurrentView }) => {
         ))}
       </section>
 
-      {/* Footer Section */}
-      <footer className="mt-24 py-12 px-container-padding bg-surface-container-lowest border-t border-outline-variant/30 rounded-[32px]">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-gutter">
-          <div>
-            <h3 className="font-headline-md text-primary font-black mb-2 text-base">TadkaMode AI</h3>
-            <p className="text-xs text-on-surface-variant max-w-xs">
-              © 2024 TadkaMode AI. Premium Culinary Precision for the Modern Kitchen.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-x-12 gap-y-6">
-            <div className="flex flex-col gap-3">
-              <h4 className="text-xs text-on-surface font-black uppercase tracking-wider">Platform</h4>
-              <a className="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
-              <a className="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
-            </div>
-            <div className="flex flex-col gap-3">
-              <h4 className="text-xs text-on-surface font-black uppercase tracking-wider">Connect</h4>
-              <a className="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Press Kit</a>
-              <a className="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+
 
     </div>
   );
