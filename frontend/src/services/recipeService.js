@@ -6,7 +6,7 @@
  * History, persistence, and deletion are handled locally via recipeHistory.js.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Service to handle communication with the backend Recipe API.
