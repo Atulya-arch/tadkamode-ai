@@ -2,6 +2,8 @@
 
 > **Turn whatever's in your fridge into a structured, step-by-step recipe — powered by Groq + Gemini.**
 
+👉 **Live Demo:** [https://tadkamode-ai.onrender.com](https://tadkamode-ai.onrender.com)
+
 TadkaMode is a frontend internship project built to demonstrate production-grade React architecture, LLM integration, structured JSON handling, robust error handling, and strong product thinking.
 
 ---
