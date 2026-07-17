@@ -320,31 +320,31 @@ export const RecipeView = ({ recipe, onReset }) => {
           <div className="glass-card p-8 rounded-[32px] shadow-sm hover:shadow-lg transition-all duration-300 border border-white/30">
             <h3 className="font-headline-md text-sm font-black text-on-surface mb-6 uppercase tracking-wider">Nutrition Profile</h3>
             <div className="space-y-6">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-on-surface-variant font-bold">Protein</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <span className="text-on-surface-variant font-bold shrink-0">Protein</span>
+                <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+                  <div className="flex-1 max-w-[128px] h-2 bg-surface-container rounded-full overflow-hidden">
                     <div className="h-full bg-primary" style={{ width: `${Math.min(100, (macros.protein / 30) * 100)}%` }}></div>
                   </div>
-                  <span className="text-on-surface font-bold">{macros.protein}g</span>
+                  <span className="text-on-surface font-bold shrink-0">{macros.protein}g</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-on-surface-variant font-bold">Carbs</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <span className="text-on-surface-variant font-bold shrink-0">Carbs</span>
+                <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+                  <div className="flex-1 max-w-[128px] h-2 bg-surface-container rounded-full overflow-hidden">
                     <div className="h-full bg-tertiary" style={{ width: `${Math.min(100, (macros.carbs / 60) * 100)}%` }}></div>
                   </div>
-                  <span className="text-on-surface font-bold">{macros.carbs}g</span>
+                  <span className="text-on-surface font-bold shrink-0">{macros.carbs}g</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-on-surface-variant font-bold">Healthy Fats</span>
-                <div className="flex items-center gap-3">
-                  <div className="w-32 h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="flex items-center justify-between gap-4 text-xs">
+                <span className="text-on-surface-variant font-bold shrink-0">Healthy Fats</span>
+                <div className="flex items-center gap-3 flex-1 justify-end min-w-0">
+                  <div className="flex-1 max-w-[128px] h-2 bg-surface-container rounded-full overflow-hidden">
                     <div className="h-full bg-primary-container" style={{ width: `${Math.min(100, (macros.fat / 25) * 100)}%` }}></div>
                   </div>
-                  <span className="text-on-surface font-bold">{macros.fat}g</span>
+                  <span className="text-on-surface font-bold shrink-0">{macros.fat}g</span>
                 </div>
               </div>
             </div>
