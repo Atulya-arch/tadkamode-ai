@@ -183,6 +183,38 @@ npm run dev
 
 ---
 
+### 3 — Running as a Monolith (Production Mode)
+
+You can also run both the backend and frontend together as a single unified service from the root directory:
+
+1. Build both projects and compile assets:
+   ```bash
+   npm run build
+   ```
+2. Start the Express server, which serves both the frontend static assets and backend API:
+   ```bash
+   npm start
+   ```
+3. Open [http://localhost:5001](http://localhost:5001) in your browser.
+
+---
+
+## 🚀 Deployment (Render / Railway)
+
+Because TadkaMode is configured as a monolith, it can be deployed on any cloud hosting provider for free (e.g., Render, Railway, Fly.io) with zero CORS issues:
+
+1. Create a new **Web Service** and link your repository.
+2. Leave the **Root Directory** blank.
+3. Configure the following build settings:
+   * **Build Command**: `npm run build`
+   * **Start Command**: `npm start`
+4. Set the **Environment Variables**:
+   * `GROQ_API_KEY`: your Groq API key
+   * `GEMINI_API_KEY`: your Gemini API key (optional)
+   * `NODE_ENV`: `production`
+
+---
+
 ## 🧪 Testing the App
 
 | Test | How |
