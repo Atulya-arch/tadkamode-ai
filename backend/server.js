@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import recipeRouter from './routes/recipe.routes.js';
 import AppError from './utils/appError.js';
 
@@ -13,10 +15,12 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // 1. Security & Logging Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
-  methods: ['POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
 
@@ -41,7 +45,19 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 5. 404 Handler
+// Serve static assets from the Vite frontend
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Serve index.html for all non-API GET requests
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path === '/health') {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
+// 5. 404 Handler for API routes
 app.all('*', (req, res, next) => {
   next(new AppError(`Route ${req.originalUrl} not found.`, 404));
 });
